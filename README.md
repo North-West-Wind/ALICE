@@ -1,2 +1,2 @@
-# NorthWestWind Bot
-It's the NorthWestWind Bot!
+# A.L.I.C.E. Bot
+It's the A.L.I.C.E. Bot!
