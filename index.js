@@ -51,6 +51,7 @@ client.once("ready", () => {
   client.user.setPresence({
     game: {
       name: prefix + "help",
+
       type: "WATCHING"
     },
     status: "online"
