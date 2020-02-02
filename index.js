@@ -16,8 +16,8 @@ const { prefix } = require("./config.json");
 const { Image, createCanvas, loadImage } = require("canvas");
 const ytdl = require("ytdl-core");
 const music = new require("./music.js");
-const giveaways = require("discord-giveaways");
 const mysql = require("mysql");
+const MojangAPI = require("mojang-api");
 const mysql_config = {
   host: "remotemysql.com",
   user: "AToOsccGeg",
@@ -43,19 +43,19 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-function setTimeout_ (fn, delay) {
-    var maxDelay = Math.pow(2,31)-1;
+function setTimeout_(fn, delay) {
+  var maxDelay = Math.pow(2, 31) - 1;
 
-    if (delay > maxDelay) {
-        var args = arguments;
-        args[1] -= maxDelay;
+  if (delay > maxDelay) {
+    var args = arguments;
+    args[1] -= maxDelay;
 
-        return setTimeout(function () {
-            setTimeout_.apply(fn, args);
-        }, maxDelay);
-    }
+    return setTimeout(function() {
+      setTimeout_.apply(fn, args);
+    }, maxDelay);
+  }
 
-    return setTimeout.apply(fn, arguments);
+  return setTimeout.apply(fn, arguments);
 }
 
 // when the client is ready, run this code
@@ -80,23 +80,23 @@ client.once("ready", () => {
       console.log("Found " + results.length + " giveaways");
       results.forEach(async result => {
         var currentDate = new Date();
-        var millisec = (result.endAt) - currentDate;
+        var millisec = result.endAt - currentDate;
         if (err) throw err;
         setTimeout_(async function() {
           var fetchGuild = await client.guilds.get(result.guild);
           var channel = await fetchGuild.channels.get(result.channel);
           var msg = await channel.fetchMessage(result.id);
-          
+
           var fetchUser = await client.fetchUser(result.author);
           var endReacted = [];
           var peopleReacted = await msg.reactions.get(result.emoji);
           await peopleReacted.fetchUsers();
           try {
-          for (const user of peopleReacted.users.values()) {
-            const data = user.id;
-            endReacted.push(data);
-          }
-          } catch(err) {
+            for (const user of peopleReacted.users.values()) {
+              const data = user.id;
+              endReacted.push(data);
+            }
+          } catch (err) {
             console.error(err);
           }
 
@@ -104,7 +104,7 @@ client.once("ready", () => {
           if (remove > -1) {
             endReacted.splice(remove, 1);
           }
-          
+
           if (endReacted.length === 0) {
             con.query("DELETE FROM giveaways WHERE id = " + msg.id, function(
               err,
@@ -130,63 +130,68 @@ client.once("ready", () => {
             msg.clearReactions().catch(err => console.error(err));
             return;
           } else {
+            var index = Math.floor(Math.random() * endReacted.length);
+            var winners = [];
+            var winnerMessage = "";
+            var winnerCount = result.winner;
 
-          
-          var index = Math.floor(Math.random() * endReacted.length);
-          var winners = [];
-          var winnerMessage = "";
-          var winnerCount = result.winner;
+            for (var i = 0; i < winnerCount; i++) {
+              winners.push(endReacted[index]);
+              index = Math.floor(Math.random() * endReacted.length);
+            }
 
-          for (var i = 0; i < winnerCount; i++) {
-            winners.push(endReacted[index]);
-            index = Math.floor(Math.random() * endReacted.length);
+            for (var i = 0; i < winners.length; i++) {
+              winnerMessage += "<@" + winners[i] + "> ";
+            }
+
+            const Ended = new Discord.RichEmbed()
+              .setColor(parseInt(result.color))
+              .setTitle(result.item)
+              .setDescription("Giveaway ended")
+              .addField("Winner(s)", winnerMessage)
+              .setTimestamp()
+              .setFooter(
+                "Hosted by " +
+                  fetchUser.username +
+                  "#" +
+                  fetchUser.discriminator,
+                fetchUser.displayAvatarURL
+              );
+            msg.edit(Ended);
+            msg
+              .clearReactions()
+              .catch(error =>
+                console.error("Failed to clear reactions: ", error)
+              );
+
+            con.query("DELETE FROM giveaways WHERE id = " + msg.id, function(
+              err,
+              con
+            ) {
+              if (err) throw err;
+              console.log("Deleted an ended giveaway record.");
+            });
           }
-
-          for (var i = 0; i < winners.length; i++) {
-            winnerMessage += "<@" + winners[i] + "> ";
-          }
-          
-          const Ended = new Discord.RichEmbed()
-            .setColor(parseInt(result.color))
-            .setTitle(result.item)
-            .setDescription("Giveaway ended")
-          .addField("Winner(s)", winnerMessage)
-            .setTimestamp()
-            .setFooter(
-              "Hosted by " + fetchUser.username + "#" + fetchUser.discriminator,
-              fetchUser.displayAvatarURL
-            );
-          msg.edit(Ended);
-          msg
-            .clearReactions()
-            .catch(error =>
-              console.error("Failed to clear reactions: ", error)
-            );
-
-          con.query("DELETE FROM giveaways WHERE id = " + msg.id, function(
-            err,
-            con
-          ) {
-            if (err) throw err;
-            console.log("Deleted an ended giveaway record.");
-          });
-        }
         }, millisec);
       });
     });
-    con.query("SELECT * FROM poll ORDER BY endAt ASC", function(err, results, fields) {
-      if(err) throw err;
+    con.query("SELECT * FROM poll ORDER BY endAt ASC", function(
+      err,
+      results,
+      fields
+    ) {
+      if (err) throw err;
       console.log("Found " + results.length + " polls.");
       results.forEach(result => {
         var currentDate = new Date();
-        var time = (result.endAt) - currentDate;
+        var time = result.endAt - currentDate;
         setTimeout_(async function() {
-        var guild = await client.guilds.get(result.guild);
+          var guild = await client.guilds.get(result.guild);
           var channel = await guild.channels.get(result.channel);
           var msg = await channel.fetchMessage(result.id);
           var author = await client.fetchUser(result.author);
           var allOptions = await JSON.parse(result.options);
-          
+
           var pollResult = [];
           var end = [];
           for (const emoji of msg.reactions.values()) {
@@ -204,7 +209,11 @@ client.once("ready", () => {
             .setColor(result.color)
             .setTitle(result.title)
             .setDescription(
-              "Poll ended. Here are the results:\n\n\n" + end.join("\n\n").replace(/#quot;/g, "'").replace(/#dquot;/g, '"')
+              "Poll ended. Here are the results:\n\n\n" +
+                end
+                  .join("\n\n")
+                  .replace(/#quot;/g, "'")
+                  .replace(/#dquot;/g, '"')
             )
             .setTimestamp()
             .setFooter(
@@ -223,9 +232,8 @@ client.once("ready", () => {
             console.log("Deleted an ended poll.");
           });
         }, time);
-        
-      })
-    })
+      });
+    });
     con.release();
   });
 });
@@ -661,6 +669,69 @@ client.on("guildDelete", guild => {
 
 client.on("message", async message => {
   // client.on('message', message => {
+  if (message.channel.id === "647630951169523762") {
+    var arg = message.content.split(" ");
+    if(arg.length > 1) {
+      return;
+    }
+    var mcName = message.content;
+    var dcUsername = message.author.tag;
+    var dcUserID = message.author.id;
+    var dcArray = dcUsername.split("#");
+    var discrim = "#" + dcArray[1];
+    var dcTag = dcArray[0] + " " + discrim;
+    MojangAPI.nameToUuid(message.content, function(err, res) {
+      if (err) throw err;
+      var mcUuid = res[0].id;
+      pool.getConnection(function(err, con) {
+        if (err) throw err;
+        con.query("SELECT * FROM dcmc WHERE `dcmc_dcid` = " + dcUserID, function(
+          err,
+          results,
+          fields
+        ) {
+          if (err) throw err;
+          if (results.length == 0) {
+            con.query(
+          "INSERT INTO dcmc (dcmc_dcid, dcmc_dcname, dcmc_name, dcmc_uuid) VALUES('" +
+            dcUserID +
+            "', '" +
+            dcTag.replace(/'/g, /\\'/) +
+            "', '" +
+            mcName +
+            "', '" +
+            mcUuid +
+            "')",
+          function(err, result) {
+            if (err) throw err;
+            console.log("Inserted a new mc-name record.");
+          }
+        );
+          } else {
+            con.query(
+          "UPDATE dcmc SET dcmc_dcname = '" +
+            dcTag.replace(/'/g, /\\'/) +
+            "', dcmc_name = '" +
+            mcName +
+            "', dcmc_uuid = '" +
+            mcUuid +
+              "', dcmc_dcname = '" +
+              dcTag +
+            "' WHERE `dcmc_dcid` = " + dcUserID,
+          function(err, result) {
+            if (err) throw err;
+            console.log("Updated a mc-name record.");
+          }
+        );
+          }
+        });
+
+        
+        con.release();
+      });
+    });
+    return;
+  }
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
