@@ -17,7 +17,6 @@ const { Image, createCanvas, loadImage } = require("canvas");
 const ytdl = require("ytdl-core");
 const music = new require("./music.js");
 const mysql = require("mysql");
-const MojangAPI = require("mojang-api")
 const mysql_config = {
   host: "remotemysql.com",
   user: "AToOsccGeg",
@@ -683,71 +682,8 @@ client.on("guildDelete", guild => {
   //remove from guildArray
 });
 
-client.on("message", async message => {
+client.on("message", message => {
   // client.on('message', message => {
-  if (message.channel.id === "647630951169523762") {
-    var arg = message.content.split(" ");
-    if(arg.length > 1) {
-      return;
-    }
-    var mcName = message.content;
-    var dcUsername = message.author.tag;
-    var dcUserID = message.author.id;
-    var dcArray = dcUsername.split("#");
-    var discrim = "#" + dcArray[1];
-    var dcTag = dcArray[0] + " " + discrim;
-    MojangAPI.nameToUuid(message.content, function(err, res) {
-      if (err) throw err;
-      var mcUuid = res[0].id;
-      pool.getConnection(function(err, con) {
-        if (err) throw err;
-        con.query("SELECT * FROM dcmc WHERE `dcmc_dcid` = " + dcUserID, function(
-          err,
-          results,
-          fields
-        ) {
-          if (err) throw err;
-          if (results.length == 0) {
-            con.query(
-          "INSERT INTO dcmc (dcmc_dcid, dcmc_dcname, dcmc_name, dcmc_uuid) VALUES('" +
-            dcUserID +
-            "', '" +
-            dcTag.replace(/'/g, /\\'/) +
-            "', '" +
-            mcName +
-            "', '" +
-            mcUuid +
-            "')",
-          function(err, result) {
-            if (err) throw err;
-            console.log("Inserted a new mc-name record.");
-          }
-        );
-          } else {
-            con.query(
-          "UPDATE dcmc SET dcmc_dcname = '" +
-            dcTag.replace(/'/g, /\\'/) +
-            "', dcmc_name = '" +
-            mcName +
-            "', dcmc_uuid = '" +
-            mcUuid +
-              "', dcmc_dcname = '" +
-              dcTag +
-            "' WHERE `dcmc_dcid` = " + dcUserID,
-          function(err, result) {
-            if (err) throw err;
-            console.log("Updated a mc-name record.");
-          }
-        );
-          }
-        });
-
-        
-        con.release();
-      });
-    });
-    return;
-  }
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
