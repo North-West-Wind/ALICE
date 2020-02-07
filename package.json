@@ -31,6 +31,7 @@
     "ffmpeg-static": "^4.0.1",
     "prism-media": "^1.2.0",
     "@discordjs/opus": "^0.1.0",
-    "nekos.life": "^2.0.5"
+    "nekos.life": "^2.0.5",
+    "discord-set": "^0.0.2"
   }
 }

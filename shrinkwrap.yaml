@@ -3,6 +3,7 @@ dependencies:
   aki-api: 3.2.1
   algebra.js: 0.2.6
   canvas: 2.6.1
+  discord-set: 0.0.2
   discord.js: 11.5.1
   express: 4.17.1
   express.js: 1.0.0
@@ -300,6 +301,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
+  /discord-set/0.0.2:
+    dependencies:
+      embedcord: 2.0.0
+      node-fetch: 2.6.0
+    dev: false
+    resolution:
+      integrity: sha512-XGHySc8j7Fbk02pcxTUwU0yCvEf78OgE3nZFeukRSWgplzrjEY9eJsJsisxrxrVjiAB5wqwj+Q7fHLC5nD48Zg==
   /discord.js/11.5.1:
     dependencies:
       long: 4.0.0
@@ -331,6 +339,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
+  /embedcord/2.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-DfXFmmD7Bv6CXsW0jxtpLWqAGgorbnZJR+EKyn/tui+QNXWVPo9XcPIm2IkLYTsRcujbVyqlKXZeeVREls682g==
   /encodeurl/1.0.2:
     dev: false
     engines:
@@ -1635,6 +1647,7 @@ specifiers:
   aki-api: ^3.2.1
   algebra.js: ^0.2.6
   canvas: ^2.6.1
+  discord-set: ^0.0.2
   discord.js: ^11.5.1
   express: ^4.17.1
   express.js: ^1.0.0
