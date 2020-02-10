@@ -1009,7 +1009,7 @@ module.exports = {
             "**" + guild.name + "** - " + results.length + " giveaways"
           )
           .setTimestamp()
-          .setFooter("Have a nice day! :)", "https://i.imgur.com/hxbaDUY.png");
+          .setFooter("Have a nice day! :)", message.client.user.displayAvatarURL);
 
         if (results.length > 25) {
           for (var i = 0; i < 25; i++) {

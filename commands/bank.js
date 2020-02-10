@@ -36,7 +36,7 @@ module.exports = {
                   .setTimestamp()
                   .setFooter(
                     'You can try to "deposit" or "withdraw"!',
-                    "https://i.imgur.com/hxbaDUY.png"
+                    message.client.user.displayAvatarURL
                   );
                 return message.channel.send(Embed);
               }
