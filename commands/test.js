@@ -4,6 +4,8 @@ var color = Math.floor(Math.random() * 16777214) + 1;
 const ytdl = require("ytdl-core");
 const YouTube = require("simple-youtube-api");
 const youtube = new YouTube(process.env.YT);
+const Canvas = require("canvas");
+const randomWords = require("random-words")
 
 const { Image, createCanvas, loadImage } = require("canvas");
 var fs = require("fs");
@@ -13,6 +15,30 @@ function twoDigits(d) {
   if (-10 < d && d < 0) return "-0" + (-1 * d).toString();
   return d.toString();
 }
+const applyText = (canvas, text) => {
+                const ctx = canvas.getContext("2d");
+
+                //calculate largest font size
+                let fontSize = canvas.width / 12;
+
+                //reduce font size loop
+                do {
+                  //reduce font size
+                  ctx.font = `${(fontSize -= 5)}px sans-serif`;
+                  // Compare pixel width of the text to the canvas minus the approximate avatar size
+                } while (
+                  ctx.measureText(text).width >
+                  canvas.width - 100
+                );
+
+                // Return the result to use in the actual canvas
+                return ctx.font;
+              };
+function validYTURL(str) {
+  var pattern = new RegExp("^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+"
+  ); // fragment locator
+  return !!pattern.test(str);
+}
 
 module.exports = {
   name: "test",
@@ -20,7 +46,8 @@ module.exports = {
   execute(message, args, pool) {
     const filter = x => x.author.id === message.author.id;
     pool.getConnection(async function(err, con) {
-      console.log(ms(args[0]))
+      const voiceChannel = message.member.voiceChannel;
+      console.log(voiceChannel);
     })
      
   }
