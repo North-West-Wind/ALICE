@@ -668,7 +668,7 @@ module.exports = {
                                                         }
 
                                                         const remove = reacted.indexOf(
-                                                          "649611982428962819"
+                                                          "653133256186789891"
                                                         );
                                                         if (remove > -1) {
                                                           reacted.splice(
@@ -892,7 +892,7 @@ try {
           endReacted.push(data);
         }
 
-        const remove = endReacted.indexOf("649611982428962819");
+        const remove = endReacted.indexOf("653133256186789891");
         if (remove > -1) {
           endReacted.splice(remove, 1);
         }

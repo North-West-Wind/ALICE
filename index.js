@@ -15,8 +15,6 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const { prefix } = require("./config.json");
 const { Image, createCanvas, loadImage } = require("canvas");
-const ytdl = require("ytdl-core");
-const music = new require("./music.js");
 const mysql = require("mysql");
 const mysql_config = {
   host: "remotemysql.com",
@@ -43,6 +41,17 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
+var musicCommandsArray = [];
+
+const musicCommandFiles = fs
+  .readdirSync("./musics")
+  .filter(file => file.endsWith(".js"));
+
+for (const file of musicCommandFiles) {
+  const musicCommand = require(`./musics/${file}`);
+  musicCommandsArray.push(musicCommand.name);
+  client.commands.set(musicCommand.name, musicCommand);
+}
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
@@ -171,8 +180,8 @@ client.once("ready", () => {
                   "**!\n" +
                   link
               );
-              msg
-                .reactions.removeAll()
+              msg.reactions
+                .removeAll()
                 .catch(error =>
                   console.error("Failed to clear reactions: ", error)
                 );
@@ -439,7 +448,9 @@ client.on("guildMemberAdd", member => {
               const image = await loadImage(url);
 
               //fetch user avatar
-              const avatar = await loadImage(member.user.displayAvatarURL({ format: "png" }));
+              const avatar = await loadImage(
+                member.user.displayAvatarURL({ format: "png" })
+              );
 
               //draw background
               ctx.drawImage(image, 0, 0, width, height);
@@ -714,14 +725,11 @@ client.on("guildDelete", guild => {
 });
 
 client.on("message", async message => {
-
   // client.on('message', message => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
   const commandName = args.shift().toLowerCase();
-
-  if (music.checkAdminCmd(message, pool)) return;
 
   if (commandName.args && !args.length) {
     let reply = `You didn't provide any arguments, ${message.author}!`;
@@ -739,11 +747,23 @@ client.on("message", async message => {
       cmd => cmd.aliases && cmd.aliases.includes(commandName)
     );
 
+  
+  
   if (!command) {
     return;
   } else {
+    if (musicCommandsArray.includes(command.name) == true) {
+      
+      const mainMusic = require("./musics/main.js")
+      try {
+        return await mainMusic.music(message, commandName);
+      } catch (error) {
+        console.error(error);
+        return await message.reply("there was an error trying to execute that command!");
+      }
+    }
     try {
-      command.execute(message, args, pool);
+      command.execute(message, args, pool, musicCommandsArray);
     } catch (error) {
       console.error(error);
       message.reply("there was an error trying to execute that command!");
