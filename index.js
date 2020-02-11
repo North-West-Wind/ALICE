@@ -9,11 +9,7 @@ setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
 }, 280000);
 
-function twoDigits(d) {
-  if (0 <= d && d < 10) return "0" + d.toString();
-  if (-10 < d && d < 0) return "-0" + (-1 * d).toString();
-  return d.toString();
-}
+const { twoDigits, setTimeout_ } = require("./function.js");
 
 const fs = require("fs");
 const Discord = require("discord.js");
@@ -47,33 +43,13 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-function setTimeout_(fn, delay) {
-  var maxDelay = Math.pow(2, 31) - 1;
-
-  if (delay > maxDelay) {
-    var args = arguments;
-    args[1] -= maxDelay;
-
-    return setTimeout(function() {
-      setTimeout_.apply(fn, args);
-    }, maxDelay);
-  }
-
-  return setTimeout.apply(fn, arguments);
-}
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
 client.once("ready", () => {
   console.log("Ready!");
 
-  client.user.setPresence({
-    game: {
-      name: "Artificial Labile Intelligence Cyberneted Existence",
-      type: "LISTENING"
-    },
-    status: "online"
-  });
+  client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "LISTENING" });
   pool.getConnection(function(err, con) {
     if (err) throw err;
     con.query("SELECT * FROM giveaways ORDER BY endAt ASC", function(
@@ -94,7 +70,7 @@ client.once("ready", () => {
             console.log("Failed fetching guild/channel of giveaway.");
           }
           try {
-            var msg = await channel.fetchMessage(result.id);
+            var msg = await channel.messages.fetch(result.id);
           } catch (err) {
             con.query("DELETE FROM giveaways WHERE id = " + result.id, function(
               err,
@@ -115,10 +91,10 @@ client.once("ready", () => {
             });
             return;
           } else {
-            var fetchUser = await client.fetchUser(result.author);
+            var fetchUser = await client.users.fetch(result.author);
             var endReacted = [];
             var peopleReacted = await msg.reactions.get(result.emoji);
-            await peopleReacted.fetchUsers();
+            await peopleReacted.users.fetch();
             try {
               for (const user of peopleReacted.users.values()) {
                 const data = user.id;
@@ -141,7 +117,7 @@ client.once("ready", () => {
                 if (err) throw err;
                 console.log("Deleted an ended giveaway record.");
               });
-              const Ended = new Discord.RichEmbed()
+              const Ended = new Discord.MessageEmbed()
                 .setColor(parseInt(result.color))
                 .setTitle(result.item)
                 .setDescription("Giveaway ended")
@@ -152,10 +128,10 @@ client.once("ready", () => {
                     fetchUser.username +
                     "#" +
                     fetchUser.discriminator,
-                  fetchUser.displayAvatarURL
+                  fetchUser.displayAvatarURL()
                 );
               msg.edit(Ended);
-              msg.clearReactions().catch(err => console.error(err));
+              msg.reactions.removeAll().catch(err => console.error(err));
               return;
             } else {
               var index = Math.floor(Math.random() * endReacted.length);
@@ -172,7 +148,7 @@ client.once("ready", () => {
                 winnerMessage += "<@" + winners[i] + "> ";
               }
 
-              const Ended = new Discord.RichEmbed()
+              const Ended = new Discord.MessageEmbed()
                 .setColor(parseInt(result.color))
                 .setTitle(result.item)
                 .setDescription("Giveaway ended")
@@ -183,7 +159,7 @@ client.once("ready", () => {
                     fetchUser.username +
                     "#" +
                     fetchUser.discriminator,
-                  fetchUser.displayAvatarURL
+                  fetchUser.displayAvatarURL()
                 );
               msg.edit(Ended);
               var link = `https://discordapp.com/channels/${msg.guild.id}/${msg.channel.id}/${msg.id}`;
@@ -196,7 +172,7 @@ client.once("ready", () => {
                   link
               );
               msg
-                .clearReactions()
+                .reactions.removeAll()
                 .catch(error =>
                   console.error("Failed to clear reactions: ", error)
                 );
@@ -228,10 +204,10 @@ client.once("ready", () => {
             var fetchGuild = await client.guilds.get(result.guild);
             var channel = await fetchGuild.channels.get(result.channel);
           } catch (err) {
-            console.log("Failed fetching guild/channel of poll.");
+            console.log("Failed fetching guild/channel of giveaway.");
           }
           try {
-            var msg = await channel.fetchMessage(result.id);
+            var msg = await channel.messages.fetch(result.id);
           } catch (err) {
             con.query("DELETE FROM poll WHERE id = " + result.id, function(
               err,
@@ -242,6 +218,7 @@ client.once("ready", () => {
             });
             return;
           }
+
           if (msg.deleted === true) {
             con.query("DELETE FROM poll WHERE id = " + msg.id, function(
               err,
@@ -252,7 +229,7 @@ client.once("ready", () => {
             });
             return;
           } else {
-            var author = await client.fetchUser(result.author);
+            var author = await client.users.fetch(result.author);
             var allOptions = await JSON.parse(result.options);
 
             var pollResult = [];
@@ -268,7 +245,7 @@ client.once("ready", () => {
               await end.push(mesg);
             }
             var pollMsg = "⬆**Poll**⬇";
-            const Ended = new Discord.RichEmbed()
+            const Ended = new Discord.MessageEmbed()
               .setColor(result.color)
               .setTitle(result.title)
               .setDescription(
@@ -281,13 +258,13 @@ client.once("ready", () => {
               .setTimestamp()
               .setFooter(
                 "Hosted by " + author.username + "#" + author.discriminator,
-                author.displayAvatarURL
+                author.displayAvatarURL()
               );
             msg.edit(pollMsg, Ended);
             var link = `https://discordapp.com/channels/${msg.guild.id}/${msg.channel.id}/${msg.id}`;
 
             msg.channel.send("A poll has ended!\n" + link);
-            msg.clearReactions().catch(err => {
+            msg.reactions.removeAll().catch(err => {
               console.error(err);
             });
             con.query("DELETE FROM poll WHERE id = " + msg.id, function(
@@ -462,7 +439,7 @@ client.on("guildMemberAdd", member => {
               const image = await loadImage(url);
 
               //fetch user avatar
-              const avatar = await loadImage(member.user.displayAvatarURL);
+              const avatar = await loadImage(member.user.displayAvatarURL({ format: "png" }));
 
               //draw background
               ctx.drawImage(image, 0, 0, width, height);
@@ -535,7 +512,7 @@ client.on("guildMemberAdd", member => {
               );
 
               //declare attachment
-              var attachment = new Discord.Attachment(
+              var attachment = new Discord.MessageAttachment(
                 canvas.toBuffer(),
                 "welcome-image.png"
               );
@@ -565,10 +542,10 @@ client.on("guildMemberAdd", member => {
             );
 
             //check if roles are found
-            if (role === null) {
+            if (role === null || role === undefined || !role) {
             } else {
               //assign role
-              member.addRole(role);
+              member.roles.add(role);
             }
           }
         }
@@ -736,7 +713,8 @@ client.on("guildDelete", guild => {
   //remove from guildArray
 });
 
-client.on("message", message => {
+client.on("message", async message => {
+
   // client.on('message', message => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
