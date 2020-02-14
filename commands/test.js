@@ -45,6 +45,7 @@ module.exports = {
   name: "test",
   description: "For test, really.",
   async execute(message, args, pool) {
-    console.log(await getData("https://open.spotify.com/playlist/2yR017eSOXqWOsE8MpoJuJ?si=yJrujTf1Sb2NSYcNkY5VFg"))
+    var fetched = await message.channel.messages.fetch({limit: 2});
+    console.log(fetched);
   }
 };
