@@ -75,10 +75,10 @@ client.once("ready", () => {
         if (err) return console.log(err);
         setTimeout_(async function() {
           try {
-            var fetchGuild = await client.guilds.get(result.guild);
-            var channel = await fetchGuild.channels.resolve(result.channel);
+            var channel = await client.channels.fetch(result.channel);
           } catch (err) {
             console.log("Failed fetching guild/channel of giveaway.");
+            return console.error(err);
           }
           try {
             var msg = await channel.messages.fetch(result.id);
@@ -104,15 +104,15 @@ client.once("ready", () => {
           } else {
             var fetchUser = await client.users.fetch(result.author);
             var endReacted = [];
-            var peopleReacted = await msg.reactions.get(result.emoji);
+            var peopleReacted = await msg.reactions.cache.get(result.emoji);
             await peopleReacted.users.fetch();
             try {
-              for (const user of peopleReacted.users.values()) {
+              for (const user of peopleReacted.users.cache.values()) {
                 const data = user.id;
                 endReacted.push(data);
               }
             } catch (err) {
-              console.error(err);
+              return console.error(err);
             }
 
             const remove = endReacted.indexOf("653133256186789891");
@@ -212,10 +212,10 @@ client.once("ready", () => {
         var time = result.endAt - currentDate;
         setTimeout_(async function() {
           try {
-            var fetchGuild = await client.guilds.get(result.guild);
-            var channel = await fetchGuild.channels.resolve(result.channel);
+            var channel = await client.channels.fetch(result.channel);
           } catch (err) {
             console.log("Failed fetching guild/channel of giveaway.");
+            return console.error(err);
           }
           try {
             var msg = await channel.messages.fetch(result.id);
@@ -245,7 +245,7 @@ client.once("ready", () => {
 
             var pollResult = [];
             var end = [];
-            for (const emoji of msg.reactions.values()) {
+            for (const emoji of msg.reactions.cache.values()) {
               await pollResult.push(emoji.count);
               var mesg =
                 "**" +
@@ -257,7 +257,7 @@ client.once("ready", () => {
             }
             var pollMsg = "⬆**Poll**⬇";
             const Ended = new Discord.MessageEmbed()
-              .setColor(result.color)
+              .setColor(parseInt(result.color))
               .setTitle(result.title)
               .setDescription(
                 "Poll ended. Here are the results:\n\n\n" +
