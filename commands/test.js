@@ -45,7 +45,10 @@ module.exports = {
   name: "test",
   description: "For test, really.",
   async execute(message, args, pool) {
-    const guildIcon = message.guild.iconURL();
-    console.log(guildIcon);
+    await message.react("🎉");
+    var msg = await message.channel.messages.fetch(message.id);
+    var tada = msg.reactions.cache.get("🎉");
+    
+    console.log(tada.users)
   }
 };
