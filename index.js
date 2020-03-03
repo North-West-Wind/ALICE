@@ -549,22 +549,7 @@ client.on("guildMemberAdd", member => {
           var roleArray = JSON.parse(result[0].autorole);
 
           //loop array
-          for (let i = 0; i < roleArray.length; i++) {
-            if (isNaN(parseInt(roleArray[i]))) {
-              var role = member.guild.roles.find(
-                role => role.name === roleArray[i]
-              );
-            } else {
-              var role = member.guild.roles.fetch(roleArray[i]);
-            }
-
-            //check if roles are found
-            if (role === null || role === undefined || !role) {
-            } else {
-              //assign role
-              member.roles.add(role);
-            }
-          }
+          member.roles.add(roleArray);
         }
 
         //release SQL
@@ -579,11 +564,6 @@ client.on("guildMemberAdd", member => {
 //someone left
 
 client.on("guildMemberRemove", member => {
-  if (
-    member.user.kicked.get(member.guild.id) &&
-    member.user.kicked.get(member.guild.id) == true
-  )
-    return member.user.kicked.clear();
   const guild = member.guild;
   pool.getConnection(function(err, con) {
     con.query(
