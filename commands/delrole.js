@@ -2,10 +2,10 @@ var color = Math.floor(Math.random() * 16777214) + 1;
 
 module.exports = {
   name: "delrole",
-  description: "Delete a role.",
+  description: "Remove a role from the server.",
   args: true,
-  usage: "<role>",
-  execute(message, args) {
+  usage: "<role | role ID | role name>",
+  async execute(message, args) {
     if (!message.member.permissions.has("MANAGE_ROLES")) {
       message.channel.send(
         `You don\'t have the permission to use this command.`
@@ -23,14 +23,14 @@ module.exports = {
     
     var roleID = args[0].replace(/<@&/g, "").replace(/>/g, "");
     if(isNaN(parseInt(roleID))) {
-      var role = message.guild.roles.find(x => x.name === `${args[0]}`);
+      var role = await message.guild.roles.cache.find(x => x.name === `${args[0]}`);
       if(role === null) {
       return message.channel.send("No role was found with the name " + args[0])
     }
     } else {
-      var role = message.guild.roles.get(roleID);
+      var role = await message.guild.roles.cache.get(roleID);
       if(role === null) {
-      return message.channel.send("No role was found with the id " + roleID)
+      return message.channel.send("No role was found!");
     }
     }
     

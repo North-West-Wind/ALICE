@@ -4,19 +4,19 @@ const { findUser } = require("../function.js")
 
 module.exports = {
   name: "unwarn",
-  description: "Clear all warnings sent to the user before.",
-  usage: "<user|id>",
+  description: "Remove all warnings of a member of the server.",
+  usage: "<user | user ID>",
   execute(message, args, pool) {
     pool.getConnection(async function(err, con) {
       
       
       if(!args[0]) {
-        return message.reply("tell me who you are warning.");
+        return message.channel.send("Tell me who you are unwarning.");
       }
       
       if (args[0] === "@everyone") {
         return message.channel.send(
-          "I cannot warn everyone lol."
+          "I cannot unwarn everyone lol."
         );
       }
       

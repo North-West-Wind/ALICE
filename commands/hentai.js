@@ -1,56 +1,25 @@
 const Discord = require("discord.js");
-const neko = require("nekos.life");
-const { nsfw } = new neko();
+const neko = require("akaneko");
 var color = Math.floor(Math.random() * 16777214) + 1;
 const { prefix } = require("../config.json");
 
 module.exports = {
   name: "hentai",
   description:
-    "Display a hentai image. Use `" +
-    prefix +
-    "hentai tags` to display tags. Empty tag for random gif.",
+    "Return something very NSFW. Require NSFW channel.",
   usage: "[tag]",
   aliases: ["h"],
   tags: [
-    "pussy",
-    "nekoGif",
-    "neko",
-    "lesbian",
-    "kuni",
-    "cumsluts",
-    "classic",
-    "boobs",
-    "bJ",
-    "anal",
-    "avatar",
-    "yuri",
-    "trap",
-    "tits",
-    "girlSoloGif",
-    "girlSolo",
-    "smallBoobs",
-    "pussyWankGif",
-    "pussyArt",
-    "kemonomimi",
-    "kitsune",
-    "keta",
-    "holo",
-    "holoEro",
-    "hentai",
-    "futanari",
+    "ass",
+    "bdsm",
+    "cum",
     "femdom",
-    "feetGif",
-    "eroFeet",
-    "feet",
-    "ero",
-    "eroKitsune",
-    "eroKemonomimi",
-    "eroNeko",
-    "eroYuri",
-    "cumArts",
-    "blowJob",
-    "pussyGif"
+    "doujin",
+    "hentai",
+    "maid",
+    "orgy",
+    "panties",
+    "neko"
   ],
   async execute(message, args) {
     if(message.channel.nsfw === false) {
@@ -72,33 +41,44 @@ module.exports = {
       return await this.random(message);
     }
     
-    var result = await nsfw[tag]();
+    if(tag === "neko") {
+      var result = neko.lewdNeko();
+    } else {
+      var result = neko.nsfw[tag]();
+    }
     
     const embed = new Discord.MessageEmbed()
+    .setTitle("Tag: " + tag)
     .setColor(color)
-    .setImage(result.url)
-    .setFooter("Made with Neko's Life", message.client.user.displayAvatarURL());
+    .setImage(result)
+    .setTimestamp()
+    .setFooter("Made with Akaneko", message.client.user.displayAvatarURL());
     message.channel.send(embed);
     
     
   },
   async random(message) {
-    var result = await nsfw.randomHentaiGif();
+    var index = Math.floor(Math.random() * this.tags.length);
+    var tag = this.tags[index];
+    if(tag === "neko") {
+      var result = neko.lewdNeko();
+    } else {
+      var result = neko.nsfw[tag]();
+    }
     const embed = new Discord.MessageEmbed()
+    .setTitle("Tag: " + tag)
       .setColor(color)
-      .setImage(result.url)
-      .setFooter("Made with Neko's Life", message.client.user.displayAvatarURL());
+      .setImage(result)
+    .setTimestamp()
+      .setFooter("Made with Akaneko", message.client.user.displayAvatarURL());
     message.channel.send(embed);
   },
   async tagsList(message) {
-    const embed = new Discord.MessageEmbed()
-      .setTitle("Hentai tag list")
-      .setColor(color)
-      .setDescription("**" + this.tags.join("\n") + "**")
-      .setFooter(
-        "Do not question when tags repeated.",
-        message.client.user.displayAvatarURL()
-      );
-    message.channel.send(embed);
+    const list = new Discord.MessageEmbed()
+    .setTitle("Tag list")
+    .setColor(color)
+    .setDescription("**" + this.tags.join("**\n**") + "**")
+    .setFooter("Have a nice day! :)", message.client.user.displayAvatarURL())
+    message.channel.send(list);
   }
 };
