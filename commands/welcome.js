@@ -4,7 +4,7 @@ const { createCanvas, Image, loadImage } = require("canvas");
 
 module.exports = {
   name: "welcome",
-  description: "Test the welcome message.",
+  description: "Test the welcome message and image.",
   execute(message, args, pool) {
     const member = message.author;
     const guild = message.guild;
@@ -16,7 +16,7 @@ module.exports = {
         "SELECT welcome, wel_channel, wel_img, autorole FROM servers WHERE id=" +
           guild.id,
         function(err, result, fields) {
-          if (result[0].wel_channel === null || result[0] === undefined || result[0].welcome === null) {
+          if (result[0].wel_channel === null || result[0] === undefined || result[0].wel_img) {
             return message.channel.send("No welcome message configured.");
           } else {
             

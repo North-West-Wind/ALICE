@@ -5,12 +5,14 @@ var color = Math.floor(Math.random() * 16777214) + 1;
 module.exports = {
   name: "shuffle",
   description: "Shuffle the song queue.",
+  usage: " ",
   async music(message, serverQueue, pool) {
     if (!message.member.voice.channel)
       return message.channel.send("You are not in a voice channel!");
 
     if (!serverQueue) return message.channel.send("There is nothing playing.");
     await shuffleArray(serverQueue.songs);
+    /*
     pool.getConnection(function(err, con) {
       con.query(
         "UPDATE servers SET queue = '" +
@@ -27,9 +29,10 @@ module.exports = {
       );
       con.release();
     });
+    */
     var index = 0;
     var songArray = serverQueue.songs.map(song => {
-      return `**${++index}-** [${song.title}](${song.url})`;
+      return `**${++index} - [${song.title}](${song.url})**`;
     });
     var queueEmbed = new Discord.MessageEmbed()
       .setColor(color)

@@ -5,8 +5,9 @@ var color = Math.floor(Math.random() * 16777214) + 1;
 
 module.exports = {
   name: "urban",
-  description: "Search in the Urban Dictionary.",
+  description: "Search the Urban Dictionary on Discord.",
   args: true,
+  usage: "<query>",
   async execute(message, args) {
     if (!args.length) {
       return message.channel.send("You need to supply a search term!");
@@ -50,123 +51,48 @@ module.exports = {
     };
 
     var s = 0;
+    await msg.react("⏮");
+    await msg.react("◀");
+    await msg.react("▶");
+    await msg.react("⏭");
+    await msg.react("⏹");
+    var collector = await msg.createReactionCollector(filter, {
+      idle: 60000,
+      errors: ["time"]
+    });
 
-    try {
-      await msg.react("⏮");
-      await msg.react("◀");
-      await msg.react("▶");
-      await msg.react("⏭");
-      await msg.react("⏹");
-      await msg
-        .awaitReactions(filter, {
-          max: 1,
-          time: 60000,
-          errors: ["time"]
-        })
-        .then(async collected => {
-          const reaction = collected.first();
-
-          if (reaction.emoji.name === "◀") {
-            s -= 1;
-            if (s < 0) {
-              s = list.length - 1;
-            }
-            reaction.users.remove(message.author.id);
-
-            edit(msg, s);
-          } else if (reaction.emoji.name === "▶") {
-            s += 1;
-            if (s > list.length - 1) {
-              s = 0;
-            }
-            reaction.users.remove(message.author.id);
-            edit(msg, s);
-          } else if (reaction.emoji.name === "⏮") {
-            s = 0;
-            reaction.users.remove(message.author.id);
-
-            edit(msg, s);
-          } else if (reaction.emoji.name === "⏭") {
-            s = list.length - 1;
-            reaction.users.remove(message.author.id);
-
-            edit(msg, s);
-          } else {
-            msg.reactions.removeAll().catch(err => {
-              console.log(err);
-            });
+    collector.on("collect", function(reaction, user) {
+      reaction.users.remove(user.id);
+      switch (reaction.emoji.name) {
+        case "⏮":
+          s = 0;
+          msg.edit(allEmbeds[s]);
+          break;
+        case "◀":
+          s -= 1;
+          if (s < 0) {
+            s = allEmbeds.length - 1;
           }
-        })
-        .catch(collected => {
-          msg.reactions.removeAll().catch(err => {
-            console.log(err);
-          });
-        });
-    } catch {
-      err => {
-        console.log(err);
-      };
-    }
-    function edit(mesg, s) {
-      mesg.edit(allEmbeds[s]).then(async msg => {
-        try {
-          await msg.react("⏮");
-          await msg.react("◀");
-          await msg.react("▶");
-          await msg.react("⏭");
-          await msg.react("⏹");
-          await msg
-            .awaitReactions(filter, {
-              max: 1,
-              time: 60000,
-              errors: ["time"]
-            })
-            .then(async collected => {
-              const reaction = collected.first();
-
-              if (reaction.emoji.name === "◀") {
-                s -= 1;
-                if (s < 0) {
-                  s = list.length - 1;
-                }
-                reaction.users.remove(message.author.id);
-
-                edit(msg, s);
-              } else if (reaction.emoji.name === "▶") {
-                s += 1;
-                if (s > list.length - 1) {
-                  s = 0;
-                }
-                reaction.users.remove(message.author.id);
-
-                edit(msg, s);
-              } else if (reaction.emoji.name === "⏮") {
-                s = 0;
-                reaction.users.remove(message.author.id);
-
-                edit(msg, s);
-              } else if (reaction.emoji.name === "⏭") {
-                s = list.length - 1;
-                reaction.users.remove(message.author.id);
-
-                edit(msg, s);
-              } else {
-                msg.reactions.removeAll().catch(err => {
-                  console.log(err);
-                });
-              }
-            })
-            .catch(collected => {
-              msg.reactions.removeAll().catch(err => {
-                console.log(err);
-              });
-            });
-        } catch {
-          err => {
-            console.log(err);
-          };
-        }
-      });
-    }
+          msg.edit(allEmbeds[s]);
+          break;
+        case "▶":
+          s += 1;
+          if (s > allEmbeds.length - 1) {
+            s = 0;
+          }
+          msg.edit(allEmbeds[s]);
+          break;
+        case "⏭":
+          s = allEmbeds.length - 1;
+          msg.edit(allEmbeds[s]);
+          break;
+        case "⏹":
+          collector.emit("end");
+          break;
+      }
+    });
+    collector.on("end", function() {
+      msg.reactions.removeAll().catch(console.error);
+    });
   }
 };

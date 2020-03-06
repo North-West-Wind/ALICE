@@ -4,8 +4,15 @@ var color = Math.floor(Math.random() * 16777214) + 1;
 
 module.exports = {
   name: "google",
-  description: "Google Search everything.",
+  description: "Google Search everything with Discord.",
+  usage: "<query>",
+  args: true,
   async execute(message, args) {
+    
+    if(args.length < 1) {
+      return message.channel.send("Please provide a query for searching!");
+    }
+    
     var options = {
       qs: {
         q: args.join(" ")

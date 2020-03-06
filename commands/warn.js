@@ -4,20 +4,20 @@ const {findUser} = require("../function.js")
 
 module.exports = {
   name: "warn",
-  description: "Send a warning to someone. 3 warning will lead to ban.",
+  description: "Warn a member of the server. 3 warnings will lead to a ban.",
   args: true,
-  usage: "<user> [reason]",
+  usage: "<user | user ID> [reason]",
   execute(message, args, pool) {
     pool.getConnection(async function(err, con) {
       if (!args[0]) {
-        return message.reply("tell me who you are warning.");
+        return message.channel.send("Tell me who you are warning.");
       }
       
       if (args[0] === "me") {
           return message.channel.send("Fuck you " + message.author);
         } else if (args[0] === "@everyone") {
           return message.channel.send(
-            "Fuck you " + message.author + ". I cannot warn everyone lol."
+            "Fuck you <@" + message.author.id + ">. I cannot warn everyone lol."
           );
         }
 
