@@ -2,14 +2,8 @@ const http = require("http");
 const express = require("express");
 const app = express();
 app.get("/", (request, response) => {
-  response.sendFile(__dirname + "/views/index.html");
+  response.sendStatus(200);
 });
-app.get("/news", (request, response) => {
-  response.sendFile(__dirname + "/views/news.html");
-});
-app.get("/about", (request, response) => {
-  response.sendFile(__dirname + "/views/about.html");
-})
 app.listen(process.env.PORT);
 setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
@@ -71,6 +65,21 @@ client.once("ready", () => {
   client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "WATCHING" });
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
+    con.query("SELECT id, queue FROM servers", function(err, results) {
+      if(err) return console.error(err);
+      const { setQueue } = require("./musics/main.js");
+      var count = 0;
+      results.forEach(result => {
+        if(result.queue === null) {
+          
+        } else {
+        var queue = JSON.parse(unescape(result.queue));
+        setQueue(result.id, queue);
+          count += 1;
+        }
+      });
+      console.log("Set " + count + " queues");
+    })
     con.query("SELECT * FROM giveaways ORDER BY endAt ASC", function(
       err,
       results,
