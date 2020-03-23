@@ -7,11 +7,12 @@ const fetch = require("node-fetch");
 const contains = (string, content) => {
   return !!~(string || "").indexOf(content);
 };
+const { prefix } = require("../config.json");
 
 module.exports = {
   name: "hypixel",
   description:
-    "Work in progress. Shows stats of a player in the Hypixel server.",
+    "Shows Hypixel related stuff.",
   args: true,
   aliases: ["hy"],
   usage: "[subcommand] <username>",
@@ -31,6 +32,8 @@ module.exports = {
     "paintball",
     "quake",
     "uhc",
+    "walls",
+    "megawalls",
     "crazywalls",
     "smashhero",
     "speeduhc",
@@ -40,12 +43,12 @@ module.exports = {
     "auctionhouse",
     "bazaar"
   ],
-  subaliases: ["g", "ach", "tnt", "bw", "du", "sw", "sg", "ar", "mm", "bb", "mcgo", "vz", "pb", "q", "uhc", "cw", "sh", "suhc", "are", "p", "sb", "ah", "ba"],
+  subaliases: ["g", "ach", "tnt", "bw", "du", "sw", "sg", "ar", "mm", "bb", "mcgo", "vz", "pb", "q", "uhc", "wa", "mw", "cw", "sh", "suhc", "are", "p", "sb", "ah", "ba"],
   async execute(message, args, pool, yeet, hypixelQueries) {
     if (hypixelQueries > 90) return message.channel.send("Hey! Slow down!");
     if (!args[0]) {
       return message.channel.send(
-        "Please use one of the subcommands or enter an username for profile!"
+        "Please use one of the subcommands or enter an username for profile!" + ` Usage: \`${prefix}${this.name} ${this.usage}\``
       );
     }
 
@@ -4401,7 +4404,7 @@ module.exports = {
                     );
                   
                   message.channel.send(Embed);
-                } else if(args[0] === "walls") {
+                }*/ else if(args[0] === "walls" || args[0] === "wa") {
                   var w = body.player.stats.Walls;
                   
                   var coins = w.coins ? w.coins : 0;
@@ -4475,7 +4478,7 @@ module.exports = {
                     );
                   
                   message.channel.send(Embed);
-                } */ else if(args[0] === "crazywalls" || args[0] === "cw") {
+                }  else if(args[0] === "crazywalls" || args[0] === "cw") {
                   var cw = body.player.stats.TrueCombat;
                   
                   var arrows = cw.arrows_shot ?cw.arrows_shot : 0;

@@ -1,4 +1,5 @@
 const { findMember } = require("../function.js");
+const { prefix } = require("../config.json");
 
 module.exports = {
   name: "autorole",
@@ -15,22 +16,26 @@ module.exports = {
       return;
     }
     if(!args[0]) {
-      return message.channel.send("Please enter the role you want the users to be.")
+      return message.channel.send("Please enter the role you want the users to be." + ` Usage: \`${prefix}${this.name} ${this.usage}\``)
     }
     if(!args[1]) {
-      return message.channel.send("Please mention at least 1 user.")
+      return message.channel.send("Please mention at least 1 user." + ` Usage: \`${prefix}${this.name} ${this.usage}\``)
     }
-    var roleID = args[0].replace(/<@&/g, "").replace(/>/g, "");
-    if(isNaN(parseInt(roleID))) {
-      var role = await message.guild.roles.cache.find(x => x.name === `${args[0]}`);
-      if(role === null) {
-      return message.channel.send("No role was found with the name " + args[0])
-    }
+     var roleID = args[0].replace(/<@&/g, "").replace(/>/g, "");
+    if (isNaN(parseInt(roleID))) {
+      var role = await message.guild.roles.cache.find(
+        x => x.name.toLowerCase() === `${args[0].toLowerCase()}`
+      );
+      if (role === null) {
+        return message.channel.send(
+          "No role was found with the name " + args[0]
+        );
+      }
     } else {
       var role = await message.guild.roles.cache.get(roleID);
-      if(role === null) {
-      return message.channel.send("No role was found with the id " + roleID)
-    }
+      if (role === null) {
+        return message.channel.send("No role was found!");
+      }
     }
     
     

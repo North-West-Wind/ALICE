@@ -14,7 +14,7 @@ module.exports = {
 
     if (!args.length) {
       const attachment = new Discord.MessageAttachment(
-        "https://cdn.glitch.com/3d575fe2-b6e6-45bb-9435-aec3db23fb8b%2Fmanual.pdf?v=1584842429794"
+        "https://cdn.glitch.com/0ee8e202-4c9f-43f0-b5eb-2c1dacae0079%2Fmanual.pdf?v=1584950891722"
       );
       const Embed = new Discord.MessageEmbed()
         .setColor(color)
@@ -44,10 +44,10 @@ module.exports = {
         .addField("**NSFW**", "hentai", true)
         .addField(
           "**Information**",
-          "help\nserver\nping\navatar\nwelcome",
+          "help\nserver\nping\navatar\nwelcome\nrole-info",
           true
         )
-        .addField("**API**", "minecraft\nhypixel\nkrunker\naki\nurban", true)
+        .addField("**API**", "minecraft\nhypixel\nkrunker\naki\nurban\noxford", true)
         .addField(
           "**Music**",
           "play\nskip\nstop\nnowplaying\nqueue\nshuffle\npause\nresume\nremove\nloop",
@@ -104,7 +104,8 @@ module.exports = {
       data.push(`**Subcommands:** ${command.subcommands.join(", ")}`);
     if (command.subaliases)
       data.push(`**Subcommands' Aliases:** ${command.subaliases.join(", ")}`);
-
+    if(command.regions)
+      data.push(`**Regions:** ${command.regions.join(", ")}`)
     if (command.subcommands)
       data.push(
         "\nIf you want to know how subcommands work, please refer to the manual."

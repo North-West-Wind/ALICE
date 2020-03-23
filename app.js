@@ -2,7 +2,13 @@ const http = require("http");
 const express = require("express");
 const app = express();
 app.get("/", (request, response) => {
-  response.sendStatus(200);
+  response.sendFile(__dirname + "/views/index.html");
+});
+app.get("/news", (request, response) => {
+  response.sendFile(__dirname + "/views/news.html");
+});
+app.get("/about", (request, response) => {
+  response.sendFile(__dirname + "/views/about.html");
 });
 app.listen(process.env.PORT);
 setInterval(() => {
@@ -13,6 +19,8 @@ const { twoDigits, setTimeout_ } = require("./function.js");
 
 const fs = require("fs");
 const Discord = require("discord.js");
+const { Set } = require("discord-set")
+const set = new Set();
 const { prefix } = require("./config.json");
 const { Image, createCanvas, loadImage } = require("canvas");
 const mysql = require("mysql");
@@ -62,7 +70,7 @@ for (const file of musicCommandFiles) {
 client.once("ready", () => {
   console.log("Ready!");
 
-  client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "WATCHING" });
+  client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "LISTENING" });
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
     con.query("SELECT id, queue FROM servers", function(err, results) {
@@ -314,14 +322,49 @@ client.login(process.env.TOKEN);
 
 client.on("guildMemberAdd", member => {
   const guild = member.guild;
+  if (guild.id === "677780367188557824")
+    setTimeout(async () => {
+      var role = await guild.roles.fetch("677785442099396608");
+      member.roles.add(role);
+    }, 60000);
   console.log(member.user.username + " has joined " + guild.name);
-  if(member.user.bot) return;
+  if (member.user.bot) return;
   pool.getConnection(function(err, con) {
+    if (err) return console.error(err);
     con.query(
       "SELECT welcome, wel_channel, wel_img, autorole FROM servers WHERE id=" +
         guild.id,
       async function(err, result, fields) {
-        if (result[0].wel_channel === null || result[0] === undefined) {
+        if (result[0] === undefined || result[0].wel_channel === null) {
+          if (result[0] === undefined) {
+            pool.getConnection(function(err, con) {
+              if (err) return console.error(err);
+              con.query(
+                "SELECT * FROM servers WHERE id = " + guild.id,
+                function(err, result, fields) {
+                  if (err) return console.error(err);
+                  if (result.length > 0) {
+                    console.log(
+                      "Found row inserted for this server before. Cancelling row insert..."
+                    );
+                  } else {
+                    con.query(
+                      "INSERT INTO servers (id, autorole, giveaway) VALUES (" +
+                        guild.id +
+                        ", '[]', '🎉')",
+                      function(err, result) {
+                        if (err) return console.error(err);
+                        console.log("Inserted record for " + guild.name);
+                      }
+                    );
+                  }
+                }
+              );
+
+              if (err) return console.error(err);
+              con.release();
+            });
+          }
         } else {
           //get channel
           const channel = guild.channels.resolve(result[0].wel_channel);
@@ -592,14 +635,44 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", member => {
   const guild = member.guild;
   pool.getConnection(function(err, con) {
+    if (err) return console.error(err);
     con.query(
       "SELECT leave_msg, leave_channel FROM servers WHERE id=" + guild.id,
       function(err, result, fields) {
         if (
+          result[0] === undefined ||
           result[0].leave_msg === null ||
-          result[0].leave_channel === null ||
-          result[0] === undefined
+          result[0].leave_channel === null
         ) {
+          if (result[0] === undefined) {
+            pool.getConnection(function(err, con) {
+              if (err) return console.error(err);
+              con.query(
+                "SELECT * FROM servers WHERE id = " + guild.id,
+                function(err, result, fields) {
+                  if (err) return console.error(err);
+                  if (result.length > 0) {
+                    console.log(
+                      "Found row inserted for this server before. Cancelling row insert..."
+                    );
+                  } else {
+                    con.query(
+                      "INSERT INTO servers (id, autorole, giveaway) VALUES (" +
+                        guild.id +
+                        ", '[]', '🎉')",
+                      function(err, result) {
+                        if (err) return console.error(err);
+                        console.log("Inserted record for " + guild.name);
+                      }
+                    );
+                  }
+                }
+              );
+
+              if (err) return console.error(err);
+              con.release();
+            });
+          }
         } else {
           const channel = guild.channels.resolve(result[0].leave_channel);
           const splitMessage = result[0].leave_msg.split(" ");
@@ -693,6 +766,7 @@ client.on("guildCreate", guild => {
   console.log("Joined a new guild: " + guild.name);
 
   pool.getConnection(function(err, con) {
+    if (err) return console.error(err);
     con.query("SELECT * FROM servers WHERE id = " + guild.id, function(
       err,
       result,
@@ -727,6 +801,7 @@ client.on("guildCreate", guild => {
 client.on("guildDelete", guild => {
   console.log("Left a guild: " + guild.name);
   pool.getConnection(function(err, con) {
+    if (err) return console.error(err);
     con.query("DELETE FROM servers WHERE id=" + guild.id, function(
       err,
       result
@@ -744,7 +819,6 @@ client.on("guildDelete", guild => {
 var exit = new Map();
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
-  
   const guild = oldState.guild || newState.guild;
   let newUserChannel = newState.channel;
   let oldUserChannel = oldState.channel;
@@ -754,10 +828,10 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     exit.set(guild.id, false);
   } else if (newUserChannel === null) {
     try {
-    if (oldUserChannel.id !== guild.me.voice.channelID) return;
-    } catch(err) {
+      if (oldUserChannel.id !== guild.me.voice.channelID) return;
+    } catch (err) {
       console.log(guild.name);
-      return console.error(err);
+      return;
     }
     // User leaves a voice channel
 
@@ -768,7 +842,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
       exit.set(guild.id, true);
 
-      console.log("Pending exit.");
+      console.log("Pending exit in " + guild.name);
 
       setTimeout(async function() {
         var shouldExit = await exit.get(guild.id);
@@ -783,11 +857,19 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 });
 
 var hypixelQueries = 0;
-setInterval(() => hypixelQueries = 0, 60000);
+setInterval(() => (hypixelQueries = 0), 60000);
 
 client.on("message", async message => {
   // client.on('message', message => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  if (!message.content.startsWith(prefix) || message.author.bot) {
+    if(!message.author.bot) {
+      if(Math.floor(Math.random() * 100) === 69)
+    set.chat(message.content).then(reply => {
+            message.channel.send(reply);
+        });
+    }
+    return;
+  };
 
   const args = message.content.slice(prefix.length).split(/ +/);
   const commandName = args.shift().toLowerCase();
@@ -826,7 +908,7 @@ client.on("message", async message => {
       command.execute(message, args, pool, musicCommandsArray, hypixelQueries);
     } catch (error) {
       console.error(error);
-      message.reply("there was an error trying to execute that command!");
+      message.reply("there was an error trying to execute that command!\nIf it still doesn't work after a few tries, please contact NorthWestWind or report it on the support server.");
     }
   }
 });
