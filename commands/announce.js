@@ -1,53 +1,30 @@
-const { findMember } = require("../function.js");
+const Discord = require('discord.js');
+const { prefix } = require("../config.json")
+const client = new Discord.Client();
 
 module.exports = {
-  name: "autorole",
-  description: 'This has nothing to do with the auto-role when a user joins the server. The command is very similar to the “?role” command, but it can assign a single to multiple users at once.',
-  args: true,
-  usage: "<role | role ID | role name> <user | user ID>",
-  async execute(message, args) {
-    if (!message.member.permissions.has('MANAGE_ROLES')) { 
-      message.channel.send(`You don\'t have the permission to use this command.`)
-      return;
-    }
-    if(!message.guild.me.permissions.has('MANAGE_ROLES')) {
-      message.channel.send(`I don\'t have the permission to add roles to them.`)
-      return;
-    }
-    if(!args[0]) {
-      return message.channel.send("Please enter the role you want the users to be.")
-    }
+	name: 'announce',
+	description: 'Let the bot announce something for you in a specific channel.',
+  aliases: ['ann'],
+  usage: "<channel | channel ID> <announcement>",
+	async execute(message, args) {
+   if(!args[0]) {
+     return message.channel.send("Please tell me the channel to announce." + ` Usage: \`${prefix}${this.name} ${this.usage}\``)
+   }
     if(!args[1]) {
-      return message.channel.send("Please mention at least 1 user.")
-    }
-     var roleID = args[0].replace(/<@&/g, "").replace(/>/g, "");
-    if (isNaN(parseInt(roleID))) {
-      var role = await message.guild.roles.cache.find(
-        x => x.name.toLowerCase() === `${args[0].toLowerCase()}`
-      );
-      if (role === null) {
-        return message.channel.send(
-          "No role was found with the name " + args[0]
-        );
-      }
-    } else {
-      var role = await message.guild.roles.cache.get(roleID);
-      if (role === null) {
-        return message.channel.send("No role was found!");
-      }
+      return message.reply("please provide the message to announce." + ` Usage: \`${prefix}${this.name} ${this.usage}\``)
     }
     
+    var channel = await message.guild.channels.resolve(args[0].replace(/<#/g, "").replace(/>/g, ""))
+    if(!channel || channel == undefined || channel == null) return message.reply("the channel is not valid!");
     
-    args.slice(1).forEach(async mentioned => {
-      var user = await findMember(message, mentioned);
-      if(!user) return;
-      try {
-      await user.roles.add(role);
-      message.channel.send("Successfully added **" + user.user.tag + "** to role **" + role.name + "**.")
-      } catch(err) {
-        message.channel.send("Failed adding **" + user.user.tag + "** to role **" + role.name + "**.")
-      }
-    })
+    var clientPermission = channel.permissionsFor(message.guild.me);
+    var userPermission = channel.permissionsFor(message.member);
+    if(!clientPermission.has("SEND_MESSAGE")) return message.reply("I don't have the permission to send message in this channel!")
+    if(!userPermission.has("SEND_MESSAGE")) return message.reply("you don't have the permission to make me send message in this channel.")
     
+    channel.send(args.slice(1).join(" "));
+    message.channel.send("Announcement made.");
+    
+}
   }
-};
