@@ -11,8 +11,8 @@ setInterval(() => {
 }, 280000);
 
 const { twoDigits, setTimeout_ } = require("./function.js");
-const log = console.log;
-log.error = console.error;
+console.realLog = console.log;
+console.realError = console.error;
 
 const fs = require("fs");
 const Discord = require("discord.js");
@@ -64,47 +64,66 @@ for (const file of musicCommandFiles) {
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
-client.once("ready", () => {
+client.once("ready", async() => {
   delete console["log"];
   delete console["error"];
 console.log = async function(str) {
-  log(str);
+  console.realLog(str);
   try {
     var logChannel = await client.channels.fetch("678847114935271425");
   } catch(err) {
-    return log.error(err)
+    return console.realError(err)
   }
     logChannel.send("`" + str + "`");
 }
   console.error = async function(str) {
-    log.error(str);
+    console.realError(str);
   try {
     var logChannel = await client.channels.fetch("678847114935271425");
   } catch(err) {
-    return log.error(err)
+    return console.realError(err)
   }
-    logChannel.send("`ERROR!`");
+    logChannel.send("`ERROR!`\n`" + str.name + "`");
   }
   console.log("Ready!");
 
+  setInterval(async() => {
+    const guild = await client.guilds.resolve("622311594654695434");
+  const memberCount = guild.memberCount;
+    const userMember = guild.members.cache;
+    var onlineMemberCount = 0;
+    var botMemberCount = 0;
+    for(const user of userMember.values()) {
+      if(user.user.bot) botMemberCount += 1;
+      if(user.presence !== undefined && user.presence.status === "online") onlineMemberCount += 1;
+      if(user.presence !== undefined && user.presence.status === "idle") onlineMemberCount += 1;
+      if(user.presence !== undefined && user.presence.status === "dnd") onlineMemberCount += 1;
+    }
+    var memberCountChannel = await guild.channels.resolve("696278930088394792");
+    var botCountChannel = await guild.channels.resolve("696279902240112671");
+    var onlineCountChannel = await guild.channels.resolve("696279477709307935");
+    
+    memberCountChannel.edit({ name: "All Members: " + memberCount}).catch(console.realError);
+    botCountChannel.edit({ name: "Bots: " + botMemberCount}).catch(console.realError);
+    onlineCountChannel.edit({ name: "Online: " + onlineMemberCount}).catch(console.realError);
+  }, 30000);
+  
   client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "LISTENING" });
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
-    con.query("SELECT id, queue FROM servers", function(err, results) {
+    con.query("SELECT id, queue, looping FROM servers", function(err, results) {
       if(err) return console.error(err);
       const { setQueue } = require("./musics/main.js");
       var count = 0;
       results.forEach(result => {
-        if(result.queue === null) {
-          
-        } else {
-        var queue = JSON.parse(unescape(result.queue));
-        setQueue(result.id, queue);
+        if(result.queue !== null || result.looping !== null) {
+        var queue = result.queue !== null ? JSON.parse(unescape(result.queue)) : [];
+        setQueue(result.id, queue, result.looping === 1 ? true : false);
           count += 1;
         }
       });
       console.log("Set " + count + " queues");
-    })
+    });
     con.query("SELECT * FROM giveaways ORDER BY endAt ASC", function(
       err,
       results,
@@ -349,13 +368,8 @@ console.log = async function(str) {
 // login to Discord with your app's token
 client.login(process.env.TOKEN);
 
-client.on("guildMemberAdd", member => {
+client.on("guildMemberAdd", async member => {
   const guild = member.guild;
-  if (guild.id === "677780367188557824")
-    setTimeout(async () => {
-      var role = await guild.roles.fetch("677785442099396608");
-      member.roles.add(role);
-    }, 60000);
   if (member.user.bot) return;
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
@@ -940,6 +954,8 @@ client.on("message", async message => {
   if (!command) {
     return;
   } else {
+    if(!message.channel.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"])) return message.author.send("I don't have the required permissions! Please tell your server admin that I at least need `" + ["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"].join("`, `") + "`!")
+    console.log("Called command " + command.name + " in " + message.guild.name);
     if (musicCommandsArray.includes(command.name) == true) {
       const mainMusic = require("./musics/main.js");
       try {
@@ -952,7 +968,7 @@ client.on("message", async message => {
       }
     }
     try {
-      command.execute(message, args, pool, musicCommandsArray, hypixelQueries, log);
+      command.execute(message, args, pool, musicCommandsArray, hypixelQueries, console.realLog);
     } catch (error) {
       console.error(error);
       message.reply("there was an error trying to execute that command!\nIf it still doesn't work after a few tries, please contact NorthWestWind or report it on the support server.");

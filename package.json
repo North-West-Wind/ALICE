@@ -1,6 +1,6 @@
 {
   "name": "alicebot",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "NorthWestWind's bot!",
   "main": "app.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "reddit-wrapper-v2": "^1.1.6",
     "discord-set": "^0.0.2",
     "smm-api": "^2.1.2",
-    "akaneko": "^2.1.0",
+    "akaneko": "^2.1.1",
     "apiai": "^4.0.3",
     "serp": "^2.0.7",
     "node-spotify-webhelper": "^0.0.6",
