@@ -108,7 +108,7 @@ console.log = async function(str) {
     onlineCountChannel.edit({ name: "Online: " + onlineMemberCount}).catch(console.realError);
   }, 30000);
   
-  client.user.setActivity("Artificial Labile Intelligence Cyberneted Existence", { type: "LISTENING" });
+  client.user.setActivity("Sword Art Online Alicization", { type: "LISTENING" });
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
     con.query("SELECT id, queue, looping FROM servers", function(err, results) {
@@ -805,7 +805,7 @@ client.on("guildMemberRemove", member => {
 
           const leaveMessage = messageArray
             .join(" ")
-            .replace(/{user}/g, member);
+            .replace(/{user}/g, `**${member.user.tag}**`);
           
           try {
           channel.send(leaveMessage);
