@@ -1,6 +1,6 @@
 dependencies:
   '@discordjs/opus': 0.1.0
-  akaneko: 2.1.0
+  akaneko: 2.1.1
   aki-api: 3.2.1
   algebra.js: 0.2.6
   apiai: 4.0.3
@@ -97,10 +97,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-D6gFiFA0RRLyUbvijN74DWAjXSFxWKaWP7mldxkVhyhAV3+SWA9HEJPHQ2c9soIeTFJqcSdFDGFgdqs1iUU2Hw==
-  /akaneko/2.1.0:
+  /akaneko/2.1.1:
     dev: false
     resolution:
-      integrity: sha512-S4lF+HNwjr7xnBoeBornAKfK3CMqdN3yokKH3tDmvlaiG3ymA+OXlSjLy1Zj+KaxxJgEIMlT3Xy+0ybH09e89A==
+      integrity: sha512-+8asmCbm1cXKq8tRByIG22pxGVornIhnrkj0ZDKGkRNuzGGOZ6NuoA6QKIfn9+gAFbeNwZ3qkNOn6iilZGSFFQ==
   /aki-api/3.2.1:
     dependencies:
       request: 2.88.2
@@ -2969,7 +2969,7 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   '@discordjs/opus': ^0.1.0
-  akaneko: ^2.1.0
+  akaneko: ^2.1.1
   aki-api: ^3.2.1
   algebra.js: ^0.2.6
   apiai: ^4.0.3
