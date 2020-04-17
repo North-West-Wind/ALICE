@@ -16,15 +16,15 @@ console.realError = console.error;
 
 const fs = require("fs");
 const Discord = require("discord.js");
-const { Set } = require("discord-set")
-const set = new Set();
+const cleverbot = require("cleverbot-free");
+const { exec } = require("child_process");
 const { prefix } = require("./config.json");
 const { Image, createCanvas, loadImage } = require("canvas");
 const mysql = require("mysql");
 const mysql_config = {
-  connectTimeout: 30000,
-  acquireTimeout: 30000,
-  timeout: 30000,
+  connectTimeout: 60 * 60 * 1000,
+  acquireTimeout: 60 * 60 * 1000,
+  timeout: 60 * 60 * 1000,
   connectionLimit: 10,
   host: process.env.DBHOST,
   user: process.env.DBUSER,
@@ -65,6 +65,17 @@ for (const file of musicCommandFiles) {
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
 client.once("ready", async() => {
+  exec("rm -rf .cache", (error, stdout, stderr) => {
+    if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+    }
+    console.log("Cleared cache");
+  });
   delete console["log"];
   delete console["error"];
 console.log = async function(str) {
@@ -688,21 +699,19 @@ client.on("guildMemberAdd", async member => {
 
 //someone left
 
-client.on("guildMemberRemove", member => {
+client.on("guildMemberRemove", async member => {
   const guild = member.guild;
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
     con.query(
       "SELECT leave_msg, leave_channel FROM servers WHERE id=" + guild.id,
-      function(err, result, fields) {
+      async function(err, result, fields) {
         if (
           result[0] === undefined ||
           result[0].leave_msg === null ||
           result[0].leave_channel === null
         ) {
           if (result[0] === undefined) {
-            pool.getConnection(function(err, con) {
-              if (err) return console.error(err);
               con.query(
                 "SELECT * FROM servers WHERE id = " + guild.id,
                 function(err, result, fields) {
@@ -726,10 +735,18 @@ client.on("guildMemberRemove", member => {
               );
 
               if (err) return console.error(err);
-              con.release();
-            });
           }
         } else {
+          if(guild.me.hasPermission("VIEW_AUDIT_LOGS")) {
+            const fetchedLogs = await guild.fetchAuditLogs({
+		          limit: 1,
+		          type: 'MEMBER_KICK',
+	          });
+	          const kickLog = fetchedLogs.entries.first();
+	          if (kickLog) return;
+          } else {
+            console.log("Can't view audit logs of " + guild.name);
+          }
           const channel = guild.channels.resolve(result[0].leave_channel);
           const splitMessage = result[0].leave_msg.split(" ");
           const messageArray = [];
@@ -917,6 +934,25 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
   }
 });
 
+client.on("guildMemberUpdate", (oldMember, newMember) => {
+  if(oldMember.premiumSinceTimestamp !== null || newMember.premiumSinceTimestamp === null) return;
+  console.log(newMember)
+  pool.getConnection(function(err, con) {
+    if(err) return console.error(err);
+    con.query("SELECT boost_msg, boost_channel FROM servers WHERE id = '" + newMember.guild.id + "'", async function(err, result) {
+      if(err) return console.error(err);
+      if(result[0] === undefined || result[0].boost_msg === null || result[0].boost_channel === null) return;
+      try {
+        var channel = await client.channels.fetch(result[0].boost_channel);
+      } catch(err) {
+        return console.error(err);
+      }
+      channel.send(result[0].boost_msg.replace(/{user}/g, `<@${newMember.id}>`));
+    });
+    con.release();
+  });
+});
+
 var hypixelQueries = 0;
 setInterval(() => (hypixelQueries = 0), 60000);
 
@@ -925,9 +961,7 @@ client.on("message", async message => {
   if (!message.content.startsWith(prefix) || message.author.bot) {
     if(!message.author.bot) {
       if(Math.floor(Math.random() * 1000) === 69)
-    set.chat(message.content).then(reply => {
-            message.channel.send(reply);
-        });
+        cleverbot(message.content).then(response => message.channel.send(response));
     }
     return;
   };
@@ -955,7 +989,6 @@ client.on("message", async message => {
     return;
   } else {
     if(!message.channel.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"])) return message.author.send("I don't have the required permissions! Please tell your server admin that I at least need `" + ["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"].join("`, `") + "`!")
-    console.log("Called command " + command.name + " in " + message.guild.name);
     if (musicCommandsArray.includes(command.name) == true) {
       const mainMusic = require("./musics/main.js");
       try {

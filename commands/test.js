@@ -15,10 +15,8 @@ var search = require('youtube-search');
 const Booru = require("booru");
 const Gfycat = require('gfycat-sdk');
 var gfycat = new Gfycat({clientId: process.env.GFYID, clientSecret: process.env.GFYSECRET});
-const PornHub = require('pornhub.js')
-const pornhub = new PornHub();
-const ph = require("pornhub");
- 
+const { exec } = require("child_process");
+
 var opts = {
   maxResults: 1,
   key: process.env.YT2
@@ -67,10 +65,17 @@ module.exports = {
       'allowfullscreen="true"&gt;&lt;/iframe&gt;'`).split("&").find(x => x.startsWith("image"));
       var arr = unescape(image).split("/");
     var id = arr[arr.length - 1].split("-")[0]; */
-    const url = decodeHtmlEntity("https://www.pornhub.com/view_video.php?viewkey=ph5ce724f427b4a&amp;t=4&amp;utm_source=galaxy&amp;utm_medium=RD&amp;utm_campaign=galaxy2");
-    pornhub.video(url).then((res) => {
-    log(res);
-    });
+    exec("rm -rf .cache", (error, stdout, stderr) => {
+    if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+    }
+    console.log(`stdout: ${stdout}`);
+});
 
   }
 };
