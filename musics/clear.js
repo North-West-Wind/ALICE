@@ -1,13 +1,14 @@
 module.exports = {
   name: "clear",
-  description: "Clear the song queue.",
+  description: "Clear the song queue. Also resets the volume to 100%.",
   usage: " ",
   music(message, serverQueue, looping, queue, pool) {
     const guild = message.guild;
-    if (serverQueue.playing) {
-      return message.channel.send("The music must be stopped first.");
-    }
 
+    if(serverQueue && serverQueue.connection != null && serverQueue.connection.dispatcher)
+  serverQueue.connection.dispatcher.destroy();
+  if(message.guild.me.voice.channel)
+  message.guild.me.voice.channel.leave();
     queue.delete(message.guild.id);
     pool.getConnection((err, con) => {
       if (err)
