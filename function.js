@@ -30,7 +30,7 @@ module.exports = {
       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
       "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
       "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+      "(\\?.*)?" + // query string
         "(\\#[-a-z\\d_]*)?$",
       "i"
     ); // fragment locator
@@ -40,8 +40,12 @@ module.exports = {
   },
   validYTURL(str) {
     var pattern = new RegExp(
-      "^(http(s)?://)?((w){3}.)?youtu(be|.be)?(.com)?/.+"
+      /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(.com)?\/.+/
     ); // fragment locator
+    return !!pattern.test(str);
+  },
+  validYTPlaylistURL(str) {
+    var pattern = new RegExp(/^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(.com)?\/playlist\?list=\w+/);
     return !!pattern.test(str);
   },
   validSPURL(str) {
@@ -84,6 +88,10 @@ module.exports = {
   },
   validRedGifURL(str) {
     var pattern = /^https?:\/\/(\w+\.)?redgifs.com\/(\w*\/)?(\w*\w*)$/;
+    return !!pattern.test(str);
+  },
+  validSCURL(str) {
+    var pattern = /^http(s)?:\/\/(soundcloud\.com|snd\.sc)\/(.+)?/;
     return !!pattern.test(str);
   },
   decodeHtmlEntity(str) {
@@ -215,15 +223,15 @@ module.exports = {
     return !!~(string || "").indexOf(content);
   }
     return (
-      contains(videoSearchResultItem.raw.snippet.channelTitle, "VEVO") ||
+      contains(videoSearchResultItem.author ? videoSearchResultItem.author.name : undefined, "VEVO") ||
       contains(
-        videoSearchResultItem.raw.snippet.channelTitle.toLowerCase(),
+        videoSearchResultItem.author ? videoSearchResultItem.author.name.toLowerCase() : undefined,
         "official"
       ) ||
       contains(
-        videoSearchResultItem.raw.snippet.title.toLowerCase(),
+        videoSearchResultItem.title.toLowerCase(),
         "official"
-      )
+      ) || !contains(videoSearchResultItem.title.toLowerCase(), "extended")
     );
   },
   elegantPair(x, y) {
