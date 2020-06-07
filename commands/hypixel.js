@@ -4,7 +4,7 @@ const http = require("http");
 var color = Math.floor(Math.random() * 16777214) + 1;
 const { twoDigits, numberWithCommas } = require("../function.js");
 const nodefetch = require("node-fetch");
-const fetch = require("fetch-retry")(nodefetch, { retries: 3, retryDelay: 1000 });
+const fetch = require("fetch-retry")(nodefetch, { retries: 10, retryDelay: 1000 });
 const contains = (string, content) => {
   return !!~(string || "").indexOf(content);
 };
@@ -5530,25 +5530,17 @@ module.exports = {
                   
                  var allEmbeds = [];
                   
-                  var magmaBoss = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/bosstimer/magma/estimatedSpawn").then(resp => resp.json().catch(console.error));
-                  var darkAuction = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/darkauction/estimate").then(resp => resp.json().catch(console.error));
-                  var bankInterest = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/bank/interest/estimate").then(resp => resp.json().catch(console.error));
-                  var newYear = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/newyear/estimate").then(resp => resp.json().catch(console.error));
-                  var travelZoo = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/zoo/estimate").then(resp => resp.json().catch(console.error));
-                  var spookyFest = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/spookyFestival/estimate").then(resp => resp.json().catch(console.error));
-                  var winterEvent = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/winter/estimate").then(resp => resp.json().catch(console.error));
-                  var jerryWorkshop = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/jerryWorkshop/estimate").then(resp => resp.json().catch(console.error));
+                  var magmaBoss = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/bosstimer/magma/estimatedSpawn").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var darkAuction = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/darkauction/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var bankInterest = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/bank/interest/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var newYear = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/newyear/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var travelZoo = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/zoo/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var spookyFest = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/spookyFestival/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var winterEvent = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/winter/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
+                  var jerryWorkshop = await fetch("https://hypixel-api.inventivetalent.org/api/skyblock/jerryWorkshop/estimate").then(resp => resp.json().catch(err => console.error("Fetching failed.")));
                   
-                  var magmaEstimate = (magmaBoss.estimate - Date.now());
-                  var darkEstimate = (darkAuction.estimate - Date.now());
-                  var bankEstimate = (bankInterest.estimate - Date.now());
-                  var yearEstimate = (newYear.estimate - Date.now());
-                  var zooEstimate = (travelZoo.estimate - Date.now());
-                  var spookEstimate = (spookyFest.estimate - Date.now());
-                  var winterEstimate = (winterEvent.estimate - Date.now());
-                  var jerryEstimate = (jerryWorkshop.estimate - Date.now());
-                  
-                  function estimateStringify(estimate) {
+                  function estimateStringify(estimateObj) {
+                    var estimate = ((estimateObj ? estimateObj.estimate : 0) - Date.now());
                     var sec = estimate / 1000;
                     var dh = Math.floor((sec % 86400) / 3600);
                     var dm = Math.floor(((sec % 86400) % 3600) / 60);
@@ -5569,14 +5561,14 @@ module.exports = {
                     return str;
                   }
                   
-                  var magmaStr = estimateStringify(magmaEstimate);
-                  var darkStr = estimateStringify(darkEstimate);
-                  var bankStr = estimateStringify(bankEstimate);
-                  var yearStr = estimateStringify(yearEstimate);
-                  var zooStr = estimateStringify(zooEstimate);
-                  var spookStr = estimateStringify(spookEstimate);
-                  var winterStr = estimateStringify(winterEstimate);
-                  var jerryStr = estimateStringify(jerryEstimate);
+                  var magmaStr = estimateStringify(magmaBoss);
+                  var darkStr = estimateStringify(darkAuction);
+                  var bankStr = estimateStringify(bankInterest);
+                  var yearStr = estimateStringify(newYear);
+                  var zooStr = estimateStringify(travelZoo);
+                  var spookStr = estimateStringify(spookyFest);
+                  var winterStr = estimateStringify(winterEvent);
+                  var jerryStr = estimateStringify(jerryWorkshop);
                   
                   var profiles = Object.values(sb.profiles);
                   for(const profile of profiles) {

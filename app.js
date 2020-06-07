@@ -2,8 +2,10 @@ const http = require("http");
 const express = require("express");
 const request = require("request");
 const app = express();
+const moment = require("moment");
 app.get("/", (req, response) => {
   response.sendStatus(200);
+  console.log(`Pinged at ${moment().format("HH:mm:ss")}`);
 });
 app.listen(process.env.PORT);
 setInterval(() => {
@@ -13,6 +15,7 @@ setInterval(() => {
 const { twoDigits, setTimeout_ } = require("./function.js");
 console.realLog = console.log;
 console.realError = console.error;
+const wait = require("util").promisify(setTimeout);
 
 const fs = require("fs");
 const Discord = require("discord.js");
@@ -43,6 +46,8 @@ client.commands = new Discord.Collection();
 client.items = new Discord.Collection();
 client.card = new Discord.Collection();
 client.uno = new Discord.Collection();
+client.timers = new Discord.Collection();
+client.noLog = [];
 
 for(let i = 0; i < 4; i++) {
   for(let s = 0; s < 13; s++) {
@@ -85,6 +90,7 @@ for (const file of musicCommandFiles) {
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
 var rm = [];
+client.invites = {};
 client.once("ready", async() => {
   exec("rm -rf .cache", (error, stdout, stderr) => {
     if (error) {
@@ -433,7 +439,90 @@ console.log = async function(str) {
         }, time);
       });
     });
+    con.query("SELECT * FROM timer", (err, results) => {
+      console.log(`Found ${results.length} timers.`);
+      results.forEach(async result => {
+        let time = result.endAt - new Date();
+        let em = new Discord.MessageEmbed();
+        try {
+          var channel = await client.channels.fetch(result.channel);
+          var msg = await channel.messages.fetch(result.msg);
+          var author = await client.users.fetch(result.author);
+          var guild = await client.guilds.resolve(result.guild);
+        } catch(err) { return; }
+        if(!channel) time = 0;
+        if(!guild) time = 0;
+        if(!msg) time = 0;
+        else if(msg.author.id !== client.user.id) time = 0;
+        else if(msg.embeds.length !== 1) time = 0;
+        else if(!msg.embeds[0].color || !msg.embeds[0].title || !msg.embeds[0].timestamp || !msg.embeds[0].footer || !msg.embeds[0].description || msg.embeds[0].author || msg.embeds[0].fields.length !== 0 || msg.embeds[0].files.length !== 0 || msg.embeds[0].image || msg.embeds[0].thumbnail || msg.embeds[0].type != "rich") time = 0;
+        if(msg.embeds[0].color && msg.embeds[0].title && msg.embeds[0].footer && msg.embeds[0].timestamp) {
+          em.setTitle(msg.embeds[0].title).setColor(msg.embeds[0].color).setFooter(msg.embeds[0].footer.text, msg.embeds[0].footer.iconURL).setTimestamp(msg.embeds[0].timestamp);
+        }
+        let count = 0;
+        let id = setInterval(async() => {
+          time -= 1000;
+          if(time <= 0) {
+            clearInterval(id);
+          em.setDescription("The timer has ended.");
+          msg = await msg.edit(em);
+          author.send(`Your timer in **${guild.name}** has ended! https://discordapp.com/channels/${guild.id}/${channel.id}/${msg.id}`);
+            con.query(`SELECT * FROM timer WHERE guild = '${guild.id}' AND channel = '${channel.id}' AND author = '${author.id}' AND msg = '${msg.id}'`, (err, results) => {
+              if(err) return console.error(err);
+              if(results.length < 1) return;
+              con.query(`DELETE FROM timer WHERE guild = '${guild.id}' AND channel = '${channel.id}' AND author = '${author.id}' AND msg = '${msg.id}'`,(err) => {
+                if(err) return console.error(err);
+                console.log("Deleted a timed out timer from the database.");
+              });
+            });
+          
+          return;
+        }
+        if(count < 4) {
+          count++;
+          return;
+        }
+        let sec = Math.floor(time / 1000);
+        var dd = Math.floor(sec / 86400);
+        var dh = Math.floor((sec % 86400) / 3600);
+        var dm = Math.floor(((sec % 86400) % 3600) / 60);
+        var ds = Math.floor(((sec % 86400) % 3600) % 60);
+        var d = "";
+        var h = "";
+        var m = "";
+        var s = "";
+        if (dd !== 0) {
+          d = " " + dd + " days";
+        }
+        if (dh !== 0) {
+          h = " " + dh + " hours";
+        }
+        if (dm !== 0) {
+          m = " " + dm + " minutes";
+        }
+        if (ds !== 0) {
+          s = " " + ds + " seconds";
+        }
+        em.setDescription(`(The timer updates every **5 seconds**)\nThis is a timer and it will last for\n**${d+h+m+s}**`);
+        msg = await msg.edit(em);
+        count = 0;
+        }, 1000);
+        client.timers.set(result.msg, id);
+      });
+    });
+    con.query("SELECT * FROM nolog", (err, results) => {
+      if(err) return console.error(err);
+      results.forEach(result => {
+        client.noLog.push(result.id);
+      });
+    });
     con.release();
+  });
+  wait(1000);
+  client.guilds.cache.forEach(g => {
+    g.fetchInvites().then(guildInvites => {
+      client.invites[g.id] = guildInvites;
+    });
   });
 });
 // login to Discord with your app's token
@@ -441,6 +530,23 @@ client.login(process.env.TOKEN);
 
 client.on("guildMemberAdd", async member => {
   const guild = member.guild;
+  guild.fetchInvites().then(async guildInvites => {
+    const ei = client.invites[member.guild.id];
+    client.invites[member.guild.id] = guildInvites;
+    const invite = await guildInvites.find(i => !ei.get(i.code) || ei.get(i.code).uses < i.uses);
+    if(!invite) return;
+    const inviter = await client.users.fetch(invite.inviter.id);
+    if(!inviter) return;
+    const allUserInvites = await guildInvites.filter(i => i.inviter.id === inviter.id && i.guild.id === guild.id);
+    const reducer = (a, b) => a+b;
+    const uses = await allUserInvites.map(i => i.uses ? i.uses : 0).reduce(reducer);
+    if(client.noLog.find(x => x === inviter.id)) return;
+    try {
+      inviter.send(`You invited **${member.user.tag}** to the server **${guild.name}**! In total, you have now invited **${uses} users** to the server!\n(If you want to disable this message, use \`${prefix}invites toggle\` to turn it off)`);
+    } catch(err) {
+      console.error("Failed to DM user.");
+    }
+  });
   if (member.user.bot) return;
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
@@ -898,9 +1004,47 @@ client.on("guildMemberRemove", async member => {
   });
 });
 
+//joined a server
+client.on("guildCreate", async guild => {
+  console.log("Joined a new guild: " + guild.name);
+  client.invites[guild.id] = await guild.fetchInvites();
+
+  pool.getConnection(function(err, con) {
+    if (err) return console.error(err);
+    con.query("SELECT * FROM servers WHERE id = " + guild.id, function(
+      err,
+      result,
+      fields
+    ) {
+      if (err) return console.error(err);
+      if (result.length > 0) {
+        console.log(
+          "Found row inserted for this server before. Cancelling row insert..."
+        );
+      } else {
+        con.query(
+          "INSERT INTO servers (id, autorole, giveaway) VALUES (" +
+            guild.id +
+            ", '[]', '🎉')",
+          function(err, result) {
+            if (err) return console.error(err);
+            console.log("Inserted record for " + guild.name);
+          }
+        );
+      }
+    });
+
+    if (err) return console.error(err);
+    con.release();
+  });
+
+  //Your other stuff like adding to guildArray
+});
+
 //removed from a server
 client.on("guildDelete", guild => {
   console.log("Left a guild: " + guild.name);
+  delete client.invites[guild.id];
   pool.getConnection(function(err, con) {
     if (err) return console.error(err);
     con.query("DELETE FROM servers WHERE id=" + guild.id, function(
@@ -944,7 +1088,6 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
 client.on("guildMemberUpdate", (oldMember, newMember) => {
   if(oldMember.premiumSinceTimestamp !== null || newMember.premiumSinceTimestamp === null) return;
-  console.log(newMember)
   pool.getConnection(function(err, con) {
     if(err) return console.error(err);
     con.query("SELECT boost_msg, boost_channel FROM servers WHERE id = '" + newMember.guild.id + "'", async function(err, result) {
@@ -1030,6 +1173,7 @@ client.on("message", async message => {
   if (!command) {
     return;
   } else {
+    if(message.guild)
     if(!message.channel.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"])) return message.author.send("I don't have the required permissions! Please tell your server admin that I at least need `" + ["SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "READ_MESSAGE_HISTORY"].join("`, `") + "`!")
     if (musicCommandsArray.includes(command.name) == true) {
       const mainMusic = require("./musics/main.js");

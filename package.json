@@ -15,10 +15,10 @@
   "dependencies": {
     "discord.js": "^12.2.0",
     "express": "^4.17.1",
-    "ytdl-core": "^2.1.2",
+    "ytdl-core": "^3.1.1",
     "mojang-api": "^0.0.2",
     "ms": "^2.1.2",
-    "aki-api": "^3.2.1",
+    "aki-api": "^5.0.0",
     "mysql": "^2.18.1",
     "request-promise": "^4.2.5",
     "node-fetch": "^2.6.0",
@@ -28,11 +28,11 @@
     "random-words": "^1.1.0",
     "ytdl-core-discord": "amishshah/ytdl-core-discord",
     "prism-media": "^1.2.2",
-    "ffmpeg-static": "^4.2.1",
+    "ffmpeg-static": "^4.2.2",
     "@discordjs/opus": "^0.3.2",
     "reddit-wrapper-v2": "^1.1.6",
     "smm-api": "^2.1.2",
-    "akaneko": "^2.1.1",
+    "akaneko": "^3.0.2",
     "serp": "^2.0.7",
     "spotify-web-api-node": "^4.0.0",
     "youtube-search": "^1.1.4",
@@ -45,9 +45,9 @@
     "@fasetto/krunker.io": "^0.4.2",
     "music-metadata": "^6.4.0",
     "request-stream": "^1.2.2",
-    "ytsr": "^0.1.13",
+    "ytsr": "^0.1.15",
     "ytpl": "^0.1.21",
-    "moment": "^2.25.3",
+    "moment": "^2.26.0",
     "moment-duration-format": "^2.2.2",
     "google-it": "^1.5.0",
     "wikijs": "^6.0.0",
@@ -56,6 +56,7 @@
     "follow-redirects": "^1.11.0",
     "fetch-retry": "^3.1.0",
     "number-to-words": "^1.2.4",
-    "solenolyrics": "^5.0.0"
+    "solenolyrics": "^5.0.0",
+    "promise-mysql": "^4.1.3"
   }
 }

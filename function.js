@@ -34,8 +34,8 @@ module.exports = {
         "(\\#[-a-z\\d_]*)?$",
       "i"
     ); // fragment locator
-    if(str.slice(8).search("open.spotify.com") === 0 || !!pattern.test(str))
-    return true;
+    if (str.slice(8).search("open.spotify.com") === 0 || !!pattern.test(str))
+      return true;
     else return false;
   },
   validYTURL(str) {
@@ -45,13 +45,13 @@ module.exports = {
     return !!pattern.test(str);
   },
   validYTPlaylistURL(str) {
-    var pattern = new RegExp(/^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(.com)?\/playlist\?list=\w+/);
+    var pattern = new RegExp(
+      /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(.com)?\/playlist\?list=\w+/
+    );
     return !!pattern.test(str);
   },
   validSPURL(str) {
-    var pattern = new RegExp(
-      /^(spotify:|https:\/\/[a-z]+\.spotify\.com\/)/
-    )
+    var pattern = new RegExp(/^(spotify:|https:\/\/[a-z]+\.spotify\.com\/)/);
     return pattern.test(str);
   },
   validImgurURL(str) {
@@ -219,27 +219,58 @@ module.exports = {
     return x;
   },
   isGoodMusicVideoContent(videoSearchResultItem) {
-   const contains = (string, content) => {
-    return !!~(string || "").indexOf(content);
-  }
+    const contains = (string, content) => {
+      return !!~(string || "").indexOf(content);
+    };
     return (
-      contains(videoSearchResultItem.author ? videoSearchResultItem.author.name : undefined, "VEVO") ||
       contains(
-        videoSearchResultItem.author ? videoSearchResultItem.author.name.toLowerCase() : undefined,
-        "official"
+        videoSearchResultItem.author
+          ? videoSearchResultItem.author.name
+          : undefined,
+        "VEVO"
       ) ||
       contains(
-        videoSearchResultItem.title.toLowerCase(),
+        videoSearchResultItem.author
+          ? videoSearchResultItem.author.name.toLowerCase()
+          : undefined,
         "official"
-      ) || !contains(videoSearchResultItem.title.toLowerCase(), "extended")
+      ) ||
+      contains(videoSearchResultItem.title.toLowerCase(), "official") ||
+      !contains(videoSearchResultItem.title.toLowerCase(), "extended")
     );
   },
   elegantPair(x, y) {
-    return (x >= y) ? (x * x + x + y) : (y * y + x);
+    return x >= y ? x * x + x + y : y * y + x;
   },
   elegantUnpair(z) {
     var sqrtz = Math.floor(Math.sqrt(z)),
-    sqz = sqrtz * sqrtz;
-    return ((z - sqz) >= sqrtz) ? [sqrtz, z - sqz - sqrtz] : [z - sqz, sqrtz];
+      sqz = sqrtz * sqrtz;
+    return z - sqz >= sqrtz ? [sqrtz, z - sqz - sqrtz] : [z - sqz, sqrtz];
+  },
+  jsDate2Mysql(newDate) {
+    function twoDigits(d) {
+      if (0 <= d && d < 10) return "0" + d.toString();
+      if (-10 < d && d < 0) return "-0" + (-1 * d).toString();
+      return d.toString();
+    }
+    var date = newDate.getDate();
+    var month = newDate.getMonth();
+    var year = newDate.getFullYear();
+    var hour = newDate.getHours();
+    var minute = newDate.getMinutes();
+    var second = newDate.getSeconds();
+    var newDateSql =
+      year +
+      "-" +
+      twoDigits(month + 1) +
+      "-" +
+      twoDigits(date) +
+      " " +
+      twoDigits(hour) +
+      ":" +
+      twoDigits(minute) +
+      ":" +
+      twoDigits(second);
+    return newDateSql;
   }
 };
