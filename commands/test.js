@@ -10,7 +10,7 @@ const neko = require("akaneko");
 const { Image, createCanvas, loadImage } = require("canvas");
 var fs = require("fs");
 var SpotifyWebApi = require("spotify-web-api-node");
-const { isGoodMusicVideoContent, validSPURL, validURL, decodeHtmlEntity, validImgurURL } = require("../function.js");
+const { isGoodMusicVideoContent, validSPURL, validURL, decodeHtmlEntity, validImgurURL, jsDate2Mysql } = require("../function.js");
 var search = require('youtube-search');
 const Booru = require("booru");
 const Gfycat = require('gfycat-sdk');
@@ -65,17 +65,7 @@ module.exports = {
       'allowfullscreen="true"&gt;&lt;/iframe&gt;'`).split("&").find(x => x.startsWith("image"));
       var arr = unescape(image).split("/");
     var id = arr[arr.length - 1].split("-")[0]; */
-    exec("rm -rf .cache", (error, stdout, stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}`);
-});
-
+    let sqlDate = jsDate2Mysql(new Date(Date.now() + 69420));
+    console.log(sqlDate);
   }
 };
