@@ -137,9 +137,9 @@ console.log = async function(str) {
       if(user.presence !== undefined && user.presence.status === "idle") onlineMemberCount += 1;
       if(user.presence !== undefined && user.presence.status === "dnd") onlineMemberCount += 1;
     }
-    var memberCountChannel = await guild.channels.resolve("696278930088394792");
-    var botCountChannel = await guild.channels.resolve("696279902240112671");
-    var onlineCountChannel = await guild.channels.resolve("696279477709307935");
+    var memberCountChannel = await guild.channels.resolve("722379389102194718");
+    var botCountChannel = await guild.channels.resolve("722379393263075338");
+    var onlineCountChannel = await guild.channels.resolve("722379393263075338");
     
     memberCountChannel.edit({ name: "All Members: " + memberCount}).catch(console.realError);
     botCountChannel.edit({ name: "Bots: " + botMemberCount}).catch(console.realError);
