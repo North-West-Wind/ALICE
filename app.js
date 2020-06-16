@@ -1,3 +1,4 @@
+require("dotenv").config();
 const http = require("http");
 const express = require("express");
 const request = require("request");
@@ -8,9 +9,6 @@ app.get("/", (req, response) => {
   console.log(`Pinged at ${moment().format("HH:mm:ss")}`);
 });
 app.listen(process.env.PORT);
-setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
 
 const { twoDigits, setTimeout_ } = require("./function.js");
 console.realLog = console.log;
