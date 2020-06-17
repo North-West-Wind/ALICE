@@ -20,7 +20,7 @@ const Discord = require("discord.js");
 const cleverbot = require("cleverbot-free");
 const { exec } = require("child_process");
 const { prefix } = require("./config.json");
-const { Image, createCanvas, loadImage } = require("canvas");
+const { Image, createCanvas, loadImage, registerFont } = require("canvas");
 const mysql = require("mysql");
 const mysql_config = {
   connectTimeout: 60 * 60 * 1000,
@@ -35,6 +35,8 @@ const mysql_config = {
   bigNumberStrings: true,
   charset: "utf8mb4"
 };
+
+registerFont("./fonts/FreeSans.ttf", { family: "free-sans" });
 
 var pool = mysql.createPool(mysql_config);
 
@@ -698,7 +700,7 @@ client.on("guildMemberAdd", async member => {
                 //reduce font size loop
                 do {
                   //reduce font size
-                  ctx.font = `${(fontSize -= 5)}px sans-serif`;
+                  ctx.font = `${(fontSize -= 5)}px "free-sans"`;
                   // Compare pixel width of the text to the canvas minus the approximate avatar size
                 } while (
                   ctx.measureText(text).width >
@@ -719,7 +721,7 @@ client.on("guildMemberAdd", async member => {
                 //reduce font size loop
                 do {
                   //reduce font size
-                  ctx.font = `${(fontSize -= 5)}px sans-serif`;
+                  ctx.font = `${(fontSize -= 5)}px "free-sans"`;
                   // Compare pixel width of the text to the canvas minus the approximate avatar size
                 } while (
                   ctx.measureText(text).width >
