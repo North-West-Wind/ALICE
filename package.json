@@ -49,6 +49,7 @@
     "request-promise": "^4.2.5",
     "request-stream": "^1.2.2",
     "serp": "^2.0.7",
+    "simple-node-logger": "^18.12.24",
     "simple-youtube-api": "^5.2.1",
     "smm-api": "^2.1.2",
     "solenolyrics": "^5.0.0",

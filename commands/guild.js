@@ -1,4 +1,4 @@
-const { findRole, findUser } = require("../function.js");
+const { findRole, findUser, getWithWeight, getRandomNumber } = require("../function.js");
 const Discord = require("discord.js");
 var color = Math.floor(Math.random() * 16777214) + 1;
 
@@ -7,8 +7,8 @@ module.exports = {
   description: "Made specificly for the Hypixel guild War of Underworld.",
   usage: "<subcommand>",
 	aliases: ["gu"],
-  subcommands: ["splash", "invite"],
-  subaliases: ["sp", "in"],
+  subcommands: ["splash", "invite", "lottery"],
+  subaliases: ["sp", "in", "lot"],
   async execute(message, args, pool) {
 		if(!args[0]) return message.channel.send("Please use a subcommand: " + `**${this.subcommands.join("**, **")}**\n` + `Usage: ${require("../config.json").prefix}${this.name} ${this.usage}`);
 
@@ -19,6 +19,11 @@ module.exports = {
 			case "in":
 			case "invite":
 			return await this.invite(message, args, pool);
+			case "lot":
+			case "lottery":
+			return await this.lottery(message, args, pool);
+			default:
+			return message.channel.send("Please use a subcommand: " + `**${this.subcommands.join("**, **")}**\n` + `Usage: ${require("../config.json").prefix}${this.name} ${this.usage}`);
 		}
   },
 	async invite(message, args, pool) {
@@ -33,10 +38,9 @@ module.exports = {
 			con.query(`SELECT * FROM dcmc WHERE dcid = "${user.id}"`, async (err, result) => {
 				if(err) return message.reply("there was an error fetchinbg the player!");
 				let channel = await message.client.channels.fetch("723479832452661269");
+				let noname = false;
 				if(result.length < 1) {
-					message.channel.send(`Player not found with the user <@${user.id}>. Rejected automatically.`);
-					channel.send(`❌ | <@${user.id}> Sorry, you cannot join the guild because we don't know your Minecraft username. Please leave your name in <#647630951169523762>`);
-					return;
+					noname = true;
 				}
 				let em = new Discord.MessageEmbed()
 				.setColor(color)
@@ -61,19 +65,19 @@ module.exports = {
 				switch(reaction.emoji.name) {
 					case "1️⃣":
 						await msg.edit({ content: "Request Accpected", embed: null});
-						channel.send(`✅ | <@${user.id}> Congratulations ! You have been invited to the guild. Please accept the invite in Hypixel in 5 minutes ! If you can't join our guild right now, you will need to find guild officers to invite you again later.`);
+						channel.send(`✅ | <@${user.id}> Congratulations ! You have been invited to the guild. Please accept the invite in Hypixel in 5 minutes ! If you can't join our guild right now, you will need to find guild officers to invite you again later.` + (noname ? "Don't forget to enter your Minecraft username in <#647630951169523762>!" : ""));
 					break;
 					case "2️⃣":
 						await msg.edit({ content: "Request Declined (Already in another guild)", embed: null});
-						channel.send(`❌ | <@${user.id}> Sorry, you are not allow to join our guild because you are already in another guild. Please read the pinned message in <#713745394026414080>!`);
+						channel.send(`❌ | <@${user.id}> Sorry, you are not allow to join our guild because you are already in another guild. Please read the pinned message in <#724271012492869642>!` + (noname ? "Don't forget to enter your Minecraft username in <#647630951169523762>!" : ""));
 					break;
 					case "3️⃣":
 						await msg.edit({ content: "Request Declined (Already in guild)", embed: null});
-						channel.send(`❌ | <@${user.id}> Sorry, you are already in our guild. If you keep spamming requests, you will get banned!`);
+						channel.send(`❌ | <@${user.id}> Sorry, you are already in our guild. If you keep spamming requests, you will get banned!` + (noname ? "Don't forget to enter your Minecraft username in <#647630951169523762>!" : ""));
 					break;
 					case "4️⃣":
 						await msg.edit({ content: "Request Declined (Already in guild)", embed: null});
-						channel.send(`❌ | <@${user.id}> Sorry, you are banned from our guild. Good luck finding another one!`);
+						channel.send(`❌ | <@${user.id}> Sorry, you are banned from our guild. Good luck finding another one!` + (noname ? "Don't forget to enter your Minecraft username in <#647630951169523762>!" : ""));
 					break;
 				}
 			});
@@ -199,5 +203,42 @@ module.exports = {
 		channel.send({ content: `<@&${role.id}>`, embed: em});
 
 		await msg.edit("The message has been sent!");
-  }
+  },
+	async lottery(message, args, pool) {
+		let items = {
+			"1": 65,
+			"2": 5,
+			"3": 3,
+			"4": 1,
+			"5": 10,
+			"6": 16
+		};
+		let id = parseInt(getWithWeight(items));
+		let prize = "";
+		let money = 0;
+		switch(id) {
+			case 1:
+				money = Math.round(getRandomNumber(100, 200));
+				prize = money + "k";
+				break;
+			case 2:
+				money = Math.round(getRandomNumber(300, 400));
+				prize = money + "k";
+				break;
+			case 3:
+				money = Math.round(getRandomNumber(500, 900));
+				prize = money + "k";
+				break;
+			case 4:
+				prize = "1m";
+				break;
+			case 5:
+				prize = "Rare Item";
+				break;
+			case 6:
+				prize = "Uncommon Item";
+				break;
+		}
+		message.channel.send(prize);
+	}
 }

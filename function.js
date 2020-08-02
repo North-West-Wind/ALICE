@@ -293,5 +293,16 @@ module.exports = {
       ":" +
       twoDigits(second);
     return newDateSql;
-  }
+  },
+	getWithWeight(input) {
+    var array = [];
+    for(var item in input) {
+        if ( input.hasOwnProperty(item) ) {
+            for( var i=0; i<input[item]; i++ ) {
+                array.push(item);
+            }
+        }
+    }
+    return array[Math.floor(Math.random() * array.length)];
+	}
 };

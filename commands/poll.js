@@ -49,6 +49,7 @@ module.exports = {
           error: ["error"]
         })
         .catch(err => msg.edit("Time's up. Cancelled action."));
+				if(!channelCollected.first()) return msg.edit("Time's up. Cancelled action.");
       if (channelCollected.first().content === "cancel") {
         await channelCollected.first().delete();
         return msg.edit("Cancelled poll.");
@@ -75,6 +76,7 @@ module.exports = {
           error: ["time"]
         })
         .catch(err => msg.edit("Time's up. Cancelled action."));
+        if(!collected.first()) return msg.edit("Time's up. Cancelled action.");
       if (collected.first().content === "cancel") {
         await collected.first().delete();
         return msg.edit("Cancelled poll.");
@@ -152,6 +154,7 @@ module.exports = {
           error: ["time"]
         })
         .catch(err => msg.edit("Time's up. Cancelled action."));
+        if(!optionString.first()) return msg.edit("Time's up. Cancelled action.");
       if (optionString.first().content === "cancel") {
         await optionString.first().delete();
         return msg.edit("Cancelled poll.");

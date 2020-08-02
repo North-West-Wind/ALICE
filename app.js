@@ -1,4 +1,6 @@
 require("dotenv").config();
+const log = require('simple-node-logger').createSimpleFileLogger('./logs/all.log');
+log.setLevel("all");
 const http = require("http");
 const express = require("express");
 const request = require("request");
@@ -7,6 +9,10 @@ const moment = require("moment");
 app.get("/", (req, response) => {
   response.sendStatus(200);
   console.log(`Pinged at ${moment().format("HH:mm:ss")}`);
+});
+app.get("/stop", (req, res) => {
+	res.sendStatus(200);
+	process.exit(1);
 });
 app.listen(process.env.PORT);
 
@@ -108,6 +114,7 @@ client.once("ready", async() => {
 console.log = async function(str) {
   console.realLog(str);
   try {
+		log.info(str);
     var logChannel = await client.channels.fetch("678847114935271425");
   } catch(err) {
     return console.realError(err)
@@ -117,6 +124,7 @@ console.log = async function(str) {
   console.error = async function(str) {
     console.realError(str);
   try {
+		log.error(str);
     var logChannel = await client.channels.fetch("678847114935271425");
   } catch(err) {
     return console.realError(err)
@@ -138,7 +146,7 @@ console.log = async function(str) {
       if(user.presence !== undefined && user.presence.status === "dnd") onlineMemberCount += 1;
     }
     var memberCountChannel = await guild.channels.resolve("722379389102194718");
-    var botCountChannel = await guild.channels.resolve("722379393263075338");
+    var botCountChannel = await guild.channels.resolve("722379396652072970");
     var onlineCountChannel = await guild.channels.resolve("722379393263075338");
     
     memberCountChannel.edit({ name: "All Members: " + memberCount}).catch(console.realError);
@@ -364,7 +372,7 @@ console.log = async function(str) {
           try {
             var channel = await client.channels.fetch(result.channel);
           } catch (err) {
-            console.log("Failed fetching guild/channel of giveaway.");
+            console.log("Failed fetching guild/channel of poll.");
             return console.error(err);
           }
           try {
