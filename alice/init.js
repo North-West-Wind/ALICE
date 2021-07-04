@@ -29,13 +29,13 @@ module.exports = (client) => {
     NorthClient.storage.card.set("0414", new Card(4, 14));
 
     const commandFiles = deepReaddir("./commands").filter(file => file.endsWith(".js"));
-    const itemFiles = fs.readdirSync("./items").filter(file => file.endsWith(".js"));
+    const itemFiles = deepReaddir("./items").filter(file => file.endsWith(".js"));
     for (const file of commandFiles) {
         const command = require(file);
         if (command.description) NorthClient.storage.commands.set(command.name, command);
     }
     for (const file of itemFiles) {
-        const item = require(`./items/${file}`);
+        const item = require(file);
         NorthClient.storage.items.set(item.name.toLowerCase(), item);
     }
     var pool = mysql.createPool(mysql_config).promise();
@@ -46,7 +46,7 @@ module.exports = (client) => {
             NorthClient.storage.error(err);
         } finally {
                 pool = mysql.createPool(mysql_config).promise();
-                clients.forEach(c => c.pool = pool);
+                client.pool = pool;
                 const queue = getQueues();
                 for (const [id, serverQueue] of queue) {
                     serverQueue.pool = pool;
@@ -54,7 +54,7 @@ module.exports = (client) => {
                 }
             }
     }));
-    clients.forEach(c => c.pool = pool);
+    client.pool = pool;
 
     client.prefix = prefix;
     client.id = 0;
