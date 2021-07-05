@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const { Aki } = require("aki-api");
 const { genPermMsg, color } = require("../../function");
 const { NorthClient } = require("../../classes/NorthClient.js");
-const { ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, InteractionResponse, ApplicationCommandOptionChoice } = require("../../classes/Slash.js");
 
 module.exports = {
   name: "aki",

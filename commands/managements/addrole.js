@@ -1,4 +1,3 @@
-const { ApplicationCommand, ApplicationCommandOption, InteractionResponse, InteractionApplicationCommandCallbackData } = require("../../classes/Slash");
 const { genPermMsg, commonRoleEmbed } = require("../../function");
 
 module.exports = {

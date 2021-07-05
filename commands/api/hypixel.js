@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const { numberWithCommas, readableDateTime, createEmbedScrolling, color, nameToUuid } = require("../../function.js");
 const fetch = require("fetch-retry")(require("node-fetch"), { retries: 5, retryDelay: 1000 });
 const { NorthClient } = require("../../classes/NorthClient.js");
-const { ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, InteractionResponse, ApplicationCommandOptionChoice } = require("../../classes/Slash.js");
 
 module.exports = {
   name: "hypixel",

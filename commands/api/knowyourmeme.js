@@ -1,6 +1,5 @@
 const cheerio = require("cheerio");
 const Discord = require("discord.js");
-const { ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, InteractionResponse } = require("../../classes/Slash.js");
 const fetch = require("fetch-retry")(require("node-fetch"), { retries: 5, retryDelay: attempt => Math.pow(2, attempt) * 1000 });
 const { createEmbedScrolling, color } = require("../../function.js");
 const config = {
