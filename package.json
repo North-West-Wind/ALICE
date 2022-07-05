@@ -15,7 +15,7 @@
   "author": "NorthWestWind",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/opus": "^0.5.3",
+    "@discordjs/opus": "^0.8.0",
     "@justalk/pornhub-api": "^3.5.0",
     "aio-mc-api": "^1.2.3",
     "akaneko": "^5.1.3",
